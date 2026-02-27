@@ -39,18 +39,25 @@ class ScreenTimeTracker(private val context: Context) {
         val startTime = calendar.timeInMillis
         val endTime = System.currentTimeMillis()
 
-        val usageStatsList: List<UsageStats> = usageStatsManager.queryUsageStats(
+        // BULLETPROOF FALLBACK for Vivo/Xiaomi/Chinese ROMs
+        // DO NOT use queryAndAggregateUsageStats on these devices.
+        val usageStatsList = usageStatsManager.queryUsageStats(
             UsageStatsManager.INTERVAL_DAILY,
             startTime,
             endTime
         ) ?: emptyList()
 
+        // Manually group by package name and add up all the chunks of time
+        val aggregatedStats = usageStatsList
+            .groupBy { it.packageName }
+            .mapValues { entry -> entry.value.sumOf { it.totalTimeInForeground } }
+
         var totalDistractionMillis = 0L
 
-        for (stats in usageStatsList) {
-            if (stats.packageName in distractingPackages) {
-                totalDistractionMillis += stats.totalTimeInForeground
-                Log.d(TAG, "${stats.packageName}: ${stats.totalTimeInForeground / 1000 / 60} min")
+        for ((packageName, totalMillis) in aggregatedStats) {
+            if (packageName in distractingPackages) {
+                totalDistractionMillis += totalMillis
+                Log.d(TAG, "$packageName: ${totalMillis / 1000 / 60} min")
             }
         }
 
@@ -150,16 +157,22 @@ class ScreenTimeTracker(private val context: Context) {
         val startTime = calendar.timeInMillis
         val endTime = System.currentTimeMillis()
 
-        // The most accurate system-aggregated stats map
-        val usageStatsMap = usageStatsManager.queryAndAggregateUsageStats(
+        // BULLETPROOF FALLBACK for Vivo/Xiaomi/Chinese ROMs
+        // DO NOT use queryAndAggregateUsageStats on these devices.
+        val usageStatsList = usageStatsManager.queryUsageStats(
+            UsageStatsManager.INTERVAL_DAILY,
             startTime,
             endTime
-        ) ?: emptyMap()
+        ) ?: emptyList()
+
+        // Manually group by package name and add up all the chunks of time
+        val aggregatedStats = usageStatsList
+            .groupBy { it.packageName }
+            .mapValues { entry -> entry.value.sumOf { it.totalTimeInForeground } }
 
         val appUsageList = mutableListOf<AppUsageItem>()
         
-        for ((packageName, stats) in usageStatsMap) {
-            val totalMillis = stats.totalTimeInForeground
+        for ((packageName, totalMillis) in aggregatedStats) {
             // Only show launchable user apps, used > 1 minute, and exclude our own app
             if (totalMillis > 60_000 && packageName in launchablePackages && packageName != context.packageName) {
                 try {
