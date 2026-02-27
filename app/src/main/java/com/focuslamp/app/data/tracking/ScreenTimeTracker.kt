@@ -10,12 +10,6 @@ import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import java.util.Calendar
 
-data class AppUsageItem(
-    val packageName: String,
-    val appName: String,
-    val icon: Drawable,
-    val usageMillis: Long
-)
 
 class ScreenTimeTracker(private val context: Context) {
 
