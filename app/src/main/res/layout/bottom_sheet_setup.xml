@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:gravity="center">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Set Focus Duration"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="24dp" />
+
+    <NumberPicker
+        android:id="@+id/numberPickerDuration"
+        android:layout_width="wrap_content"
+        android:layout_height="180dp"
+        android:layout_marginBottom="24dp" />
+
+    <Button
+        android:id="@+id/btnStartSession"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:text="🚀 Start Focus"
+        android:textSize="16sp"
+        android:textAllCaps="false"
+        android:backgroundTint="@color/accent_green" />
+
+</LinearLayout>

@@ -1,0 +1,15 @@
+# Focus Lamp
+/build
+/app/build
+*.iml
+.gradle
+local.properties
+.idea
+*.apk
+*.ap_
+*.dex
+bin/
+gen/
+out/
+.cxx/
+*.hprof

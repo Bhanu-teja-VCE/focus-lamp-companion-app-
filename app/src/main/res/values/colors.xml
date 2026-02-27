@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark Theme Background -->
+    <color name="background_dark">#0F1123</color>
+    <color name="surface_dark">#1A1D2E</color>
+
+    <!-- Accent Colors -->
+    <color name="accent_green">#4ADE80</color>
+    <color name="accent_blue">#60A5FA</color>
+    <color name="warning_red">#F87171</color>
+    <color name="warning_amber">#FBBF24</color>
+
+    <!-- Text Colors -->
+    <color name="text_white">#F1F5F9</color>
+    <color name="text_gray">#94A3B8</color>
+
+    <!-- Session Colors -->
+    <color name="focus_green">#166534</color>
+    <color name="focus_ended">#991B1B</color>
+
+    <!-- Material Theme Override -->
+    <color name="colorPrimary">#4ADE80</color>
+    <color name="colorPrimaryVariant">#22C55E</color>
+    <color name="colorOnPrimary">#0F1123</color>
+    <color name="colorSecondary">#60A5FA</color>
+    <color name="colorSecondaryVariant">#3B82F6</color>
+    <color name="colorOnSecondary">#0F1123</color>
+    <color name="colorSurface">#1A1D2E</color>
+    <color name="colorOnSurface">#F1F5F9</color>
+    <color name="colorError">#F87171</color>
+    <color name="colorOnError">#0F1123</color>
+    <color name="colorBackground">#0F1123</color>
+    <color name="colorOnBackground">#F1F5F9</color>
+</resources>
