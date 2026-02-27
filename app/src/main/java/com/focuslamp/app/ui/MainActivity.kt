@@ -47,7 +47,7 @@ class MainActivity : AppCompatActivity() {
 
         binding.bottomNavigation.setupWithNavController(navController)
         
-        // Custom bottom navigation item handling for the middle lamp button and profile
+        // Custom bottom navigation item handling for the middle lamp button
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_lamp -> {
@@ -55,10 +55,6 @@ class MainActivity : AppCompatActivity() {
                     val bottomSheet = FocusSetupBottomSheet()
                     bottomSheet.show(supportFragmentManager, "FocusSetupBottomSheet")
                     return@setOnItemSelectedListener false // don't check the item
-                }
-                R.id.nav_profile -> {
-                    Toast.makeText(this, "Profile coming soon!", Toast.LENGTH_SHORT).show()
-                    return@setOnItemSelectedListener false
                 }
                 else -> {
                     // Let navigation controller handle the rest

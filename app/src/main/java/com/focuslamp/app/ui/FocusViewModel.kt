@@ -206,6 +206,19 @@ class FocusViewModel(application: Application) : AndroidViewModel(application) {
     // Statistics
     // ===========================
 
+    private val _detailedAppUsage = MutableLiveData<List<com.focuslamp.app.data.tracking.AppUsageItem>>()
+    val detailedAppUsage: LiveData<List<com.focuslamp.app.data.tracking.AppUsageItem>> = _detailedAppUsage
+
+    private val _weeklyUsage = MutableLiveData<List<Long>>()
+    val weeklyUsage: LiveData<List<Long>> = _weeklyUsage
+
+    fun loadDetailedStats() {
+        viewModelScope.launch {
+            _detailedAppUsage.value = screenTimeTracker.getAllAppsUsageToday()
+            _weeklyUsage.value = screenTimeTracker.getWeeklyUsage()
+        }
+    }
+
     fun loadStats() {
         viewModelScope.launch {
             _totalFocusMinutes.value = sessionDao.getTotalFocusMinutes() ?: 0

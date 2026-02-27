@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/background_dark">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="App activity details"
+        android:textSize="20sp"
+        android:textColor="@color/text_white"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:padding="16dp" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <!-- Total Today -->
+            <TextView
+                android:id="@+id/tvTotalTimeToday"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="0 hr, 0 min"
+                android:textSize="36sp"
+                android:textColor="@color/text_white"
+                android:gravity="center"
+                android:layout_marginTop="16dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Today"
+                android:textSize="14sp"
+                android:textColor="@color/text_secondary"
+                android:gravity="center"
+                android:layout_marginBottom="32dp" />
+
+            <!-- Bar Chart Area -->
+            <LinearLayout
+                android:id="@+id/chartContainer"
+                android:layout_width="match_parent"
+                android:layout_height="180dp"
+                android:orientation="horizontal"
+                android:gravity="bottom"
+                android:layout_marginBottom="16dp">
+
+                <!-- Bars added dynamically in code -->
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/surface_border"
+                android:layout_marginBottom="24dp" />
+
+            <TextView
+                android:id="@+id/tvCurrentDate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Today, Date"
+                android:textSize="16sp"
+                android:textColor="@color/text_white"
+                android:gravity="center"
+                android:layout_marginBottom="16dp" />
+
+            <!-- RecyclerView for Apps -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvAppsUsage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false" />
+
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>

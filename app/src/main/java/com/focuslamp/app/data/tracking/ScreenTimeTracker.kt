@@ -74,4 +74,100 @@ class ScreenTimeTracker(private val context: Context) {
         val stats = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, startTime, endTime)
         return stats != null && stats.isNotEmpty()
     }
+
+    /**
+     * Gets total foreground time per day for the last 7 days.
+     * Returns a list of Long values (minutes) ordered from 6 days ago to today.
+     */
+    fun getWeeklyUsage(): List<Long> {
+        val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as? UsageStatsManager
+            ?: return List(7) { 0L }
+
+        val weeklyStats = mutableListOf<Long>()
+        
+        // Go 7 days back
+        for (i in 6 downTo 0) {
+            val calendar = Calendar.getInstance().apply {
+                add(Calendar.DAY_OF_YEAR, -i)
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
+            val startTime = calendar.timeInMillis
+            val endTime = startTime + (24 * 60 * 60 * 1000) // End of that day
+
+            // Adjust end time to not be in the future for today
+            val finalEndTime = if (i == 0) System.currentTimeMillis() else endTime
+
+            val stats = usageStatsManager.queryUsageStats(
+                UsageStatsManager.INTERVAL_DAILY,
+                startTime,
+                finalEndTime
+            ) ?: emptyList()
+
+            var totalMillis = 0L
+            stats.forEach { 
+                // Ignore extremely small usages (like < 1 second) and focus on user apps
+                if (it.totalTimeInForeground > 1000) {
+                    totalMillis += it.totalTimeInForeground
+                }
+            }
+            weeklyStats.add(totalMillis / 1000 / 60)
+        }
+        
+        return weeklyStats
+    }
+
+    /**
+     * Gets a detailed list of all apps used today, sorted by duration.
+     */
+    fun getAllAppsUsageToday(): List<AppUsageItem> {
+        val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as? UsageStatsManager
+            ?: return emptyList()
+            
+        val pm = context.packageManager
+
+        val calendar = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+        val startTime = calendar.timeInMillis
+        val endTime = System.currentTimeMillis()
+
+        val usageStatsList = usageStatsManager.queryUsageStats(
+            UsageStatsManager.INTERVAL_DAILY,
+            startTime,
+            endTime
+        ) ?: emptyList()
+
+        val appUsageList = mutableListOf<AppUsageItem>()
+        
+        for (stats in usageStatsList) {
+            // Only show apps used for more than 1 minute
+            if (stats.totalTimeInForeground > 60_000) {
+                try {
+                    val appInfo = pm.getApplicationInfo(stats.packageName, 0)
+                    val appName = pm.getApplicationLabel(appInfo).toString()
+                    val icon = pm.getApplicationIcon(appInfo)
+                    
+                    appUsageList.add(
+                        AppUsageItem(
+                            packageName = stats.packageName,
+                            appName = appName,
+                            icon = icon,
+                            usageMillis = stats.totalTimeInForeground
+                        )
+                    )
+                } catch (e: Exception) {
+                    // Package not found or system app, skip
+                }
+            }
+        }
+        
+        // Sort descending
+        return appUsageList.sortedByDescending { it.usageMillis }
+    }
 }
