@@ -1,91 +1,140 @@
 package com.focuslamp.app.data.tracking
 
-import android.app.usage.UsageStats
+import android.app.AppOpsManager
+import android.app.usage.UsageEvents
 import android.app.usage.UsageStatsManager
 import android.content.Context
-import android.util.Log
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.graphics.drawable.Drawable
 import java.util.Calendar
 
-/**
- * Queries the UsageStatsManager API to check how much time the user
- * has spent on "distracting" apps today.
- *
- * IMPORTANT: Requires PACKAGE_USAGE_STATS permission.
- * The user must manually enable "Usage Access" in Settings > Security > Apps with usage access.
- */
+data class AppUsageItem(
+    val packageName: String,
+    val appName: String,
+    val icon: Drawable,
+    val usageMillis: Long
+)
+
 class ScreenTimeTracker(private val context: Context) {
 
-    companion object {
-        private const val TAG = "ScreenTimeTracker"
+    /**
+     * Check if the user has granted Usage Access permission.
+     * Direct the user to Settings > Apps > Special app access > Usage access if false.
+     */
+    fun hasUsageAccessPermission(): Boolean {
+        val appOpsManager = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
+        val mode = appOpsManager.checkOpNoThrow(
+            AppOpsManager.OPSTR_GET_USAGE_STATS,
+            android.os.Process.myUid(),
+            context.packageName
+        )
+        return mode == AppOpsManager.MODE_ALLOWED
     }
 
     /**
-     * Returns the total foreground time (in minutes) spent on the given package names today.
+     * Returns today's per-app foreground usage, built from raw UsageEvents.
+     *
+     * WHY queryEvents() instead of queryUsageStats() / queryAndAggregateUsageStats():
+     * OEM ROMs (Vivo/Funtouch, MIUI, ColorOS, etc.) frequently corrupt or truncate
+     * the aggregated stats that the higher-level APIs return. However, they still feed
+     * raw events into the event stream that the lower-level queryEvents() reads from,
+     * because that stream is also used internally by the OS itself. Apps like Action Dash
+     * rely exclusively on this event-based approach for exactly this reason.
+     *
+     * The algorithm:
+     *  1. Iterate every event from midnight → now.
+     *  2. When we see ACTIVITY_RESUMED for a package, record the timestamp as a session start.
+     *  3. When we see ACTIVITY_PAUSED / ACTIVITY_STOPPED for a package, close the open
+     *     session and accumulate the elapsed time.
+     *  4. If a session is still open at query time (app is currently in foreground),
+     *     close it against the current time so live usage is included.
      */
-    fun getDistractionTimeToday(distractingPackages: Set<String>): Long {
-        val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as? UsageStatsManager
-        if (usageStatsManager == null) {
-            Log.e(TAG, "UsageStatsManager not available")
-            return 0
-        }
+    fun getAllAppsUsageToday(): List<AppUsageItem> {
+        if (!hasUsageAccessPermission()) return emptyList()
 
-        // Query from midnight today until now
-        val calendar = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }
-        val startTime = calendar.timeInMillis
+        val usageStatsManager =
+            context.getSystemService(Context.USAGE_STATS_SERVICE) as? UsageStatsManager
+                ?: return emptyList()
+
+        val startTime = getMidnightTimestamp()
         val endTime = System.currentTimeMillis()
 
-        // BULLETPROOF FALLBACK for Vivo/Xiaomi/Chinese ROMs
-        // DO NOT use queryAndAggregateUsageStats on these devices.
-        val usageStatsList = usageStatsManager.queryUsageStats(
-            UsageStatsManager.INTERVAL_DAILY,
-            startTime,
-            endTime
-        ) ?: emptyList()
+        // --- Step 1: Collect launchable packages so we only show real user-facing apps ---
+        val launchablePackages = getLaunchablePackages()
 
-        // Manually group by package name and add up all the chunks of time
-        val aggregatedStats = usageStatsList
-            .groupBy { it.packageName }
-            .mapValues { entry -> entry.value.sumOf { it.totalTimeInForeground } }
+        // --- Step 2: Walk the raw event stream ---
+        val usageEvents = usageStatsManager.queryEvents(startTime, endTime)
+        val event = UsageEvents.Event()
 
-        var totalDistractionMillis = 0L
+        // packageName -> timestamp when the app last came to foreground
+        val sessionStarts = mutableMapOf<String, Long>()
+        // packageName -> total accumulated milliseconds today
+        val accumulatedTime = mutableMapOf<String, Long>()
 
-        for ((packageName, totalMillis) in aggregatedStats) {
-            if (packageName in distractingPackages) {
-                totalDistractionMillis += totalMillis
-                Log.d(TAG, "$packageName: ${totalMillis / 1000 / 60} min")
+        while (usageEvents.hasNextEvent()) {
+            usageEvents.getNextEvent(event)
+
+            val pkg = event.packageName ?: continue
+
+            when (event.eventType) {
+                UsageEvents.Event.ACTIVITY_RESUMED -> {
+                    // App came to foreground. Record start time.
+                    // Only update if there isn't already an open session (handles multi-window edge cases).
+                    if (!sessionStarts.containsKey(pkg)) {
+                        sessionStarts[pkg] = event.timeStamp
+                    }
+                }
+
+                UsageEvents.Event.ACTIVITY_PAUSED,
+                UsageEvents.Event.ACTIVITY_STOPPED -> {
+                    // App left foreground. Close the open session if one exists.
+                    val sessionStart = sessionStarts.remove(pkg) ?: continue
+                    val elapsed = event.timeStamp - sessionStart
+                    if (elapsed > 0) {
+                        accumulatedTime[pkg] = (accumulatedTime[pkg] ?: 0L) + elapsed
+                    }
+                }
             }
         }
 
-        val totalMinutes = totalDistractionMillis / 1000 / 60
-        Log.d(TAG, "Total distraction time today: $totalMinutes minutes")
-        return totalMinutes
-    }
-
-    /**
-     * Checks if the app has Usage Access permission using AppOpsManager.
-     */
-    fun hasUsagePermission(): Boolean {
-        val appOpsManager = context.getSystemService(Context.APP_OPS_SERVICE) as? android.app.AppOpsManager
-            ?: return false
-        val mode = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-            appOpsManager.unsafeCheckOpNoThrow(
-                android.app.AppOpsManager.OPSTR_GET_USAGE_STATS,
-                android.os.Process.myUid(),
-                context.packageName
-            )
-        } else {
-            appOpsManager.checkOpNoThrow(
-                android.app.AppOpsManager.OPSTR_GET_USAGE_STATS,
-                android.os.Process.myUid(),
-                context.packageName
-            )
+        // --- Step 3: Close any sessions still open (app is currently in foreground) ---
+        for ((pkg, sessionStart) in sessionStarts) {
+            val elapsed = endTime - sessionStart
+            if (elapsed > 0) {
+                accumulatedTime[pkg] = (accumulatedTime[pkg] ?: 0L) + elapsed
+            }
         }
-        return mode == android.app.AppOpsManager.MODE_ALLOWED
+
+        // --- Step 4: Build the result list ---
+        val pm = context.packageManager
+        val result = mutableListOf<AppUsageItem>()
+
+        for ((packageName, totalMillis) in accumulatedTime) {
+            // Skip: less than 1 second, non-launchable (system services), or this app itself
+            if (totalMillis < MIN_USAGE_THRESHOLD_MS) continue
+            if (packageName !in launchablePackages) continue
+            if (packageName == context.packageName) continue
+
+            try {
+                val appInfo = pm.getApplicationInfo(packageName, 0)
+                val appName = pm.getApplicationLabel(appInfo).toString()
+                val icon = pm.getApplicationIcon(appInfo)
+
+                result.add(
+                    AppUsageItem(
+                        packageName = packageName,
+                        appName = appName,
+                        icon = icon,
+                        usageMillis = totalMillis
+                    )
+                )
+            } catch (e: PackageManager.NameNotFoundException) {
+                // Package was uninstalled during the query window — skip silently.
+            }
+        }
+
+        return result.sortedByDescending { it.usageMillis }
     }
 
     /**
@@ -108,9 +157,8 @@ class ScreenTimeTracker(private val context: Context) {
                 set(Calendar.MILLISECOND, 0)
             }
             val startTime = calendar.timeInMillis
-            val endTime = startTime + (24 * 60 * 60 * 1000) // End of that day
+            val endTime = startTime + (24 * 60 * 60 * 1000)
 
-            // Adjust end time to not be in the future for today
             val finalEndTime = if (i == 0) System.currentTimeMillis() else endTime
 
             val stats = usageStatsManager.queryUsageStats(
@@ -121,7 +169,6 @@ class ScreenTimeTracker(private val context: Context) {
 
             var totalMillis = 0L
             stats.forEach { 
-                // Ignore extremely small usages (like < 1 second) and focus on user apps
                 if (it.totalTimeInForeground > 1000) {
                     totalMillis += it.totalTimeInForeground
                 }
@@ -133,68 +180,61 @@ class ScreenTimeTracker(private val context: Context) {
     }
 
     /**
-     * Gets a detailed list of all apps used today, sorted by duration.
+     * Returns the total foreground time (in minutes) spent on the given package names today.
      */
-    fun getAllAppsUsageToday(): List<AppUsageItem> {
+    fun getDistractionTimeToday(distractingPackages: Set<String>): Long {
         val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as? UsageStatsManager
-            ?: return emptyList()
-            
-        val pm = context.packageManager
+            ?: return 0
 
-        // Get all packages that are actual "apps" with a launcher icon
-        val mainIntent = android.content.Intent(android.content.Intent.ACTION_MAIN).apply {
-            addCategory(android.content.Intent.CATEGORY_LAUNCHER)
-        }
-        val resolveInfos = pm.queryIntentActivities(mainIntent, 0)
-        val launchablePackages = resolveInfos.map { it.activityInfo.packageName }.toSet()
-
-        val calendar = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }
-        val startTime = calendar.timeInMillis
+        val startTime = getMidnightTimestamp()
         val endTime = System.currentTimeMillis()
 
-        // BULLETPROOF FALLBACK for Vivo/Xiaomi/Chinese ROMs
-        // DO NOT use queryAndAggregateUsageStats on these devices.
-        val usageStatsList = usageStatsManager.queryUsageStats(
+        val usageStatsList: List<UsageStats> = usageStatsManager.queryUsageStats(
             UsageStatsManager.INTERVAL_DAILY,
             startTime,
             endTime
         ) ?: emptyList()
 
-        // Manually group by package name and add up all the chunks of time
+        var totalDistractionMillis = 0L
+
         val aggregatedStats = usageStatsList
             .groupBy { it.packageName }
             .mapValues { entry -> entry.value.sumOf { it.totalTimeInForeground } }
 
-        val appUsageList = mutableListOf<AppUsageItem>()
-        
         for ((packageName, totalMillis) in aggregatedStats) {
-            // Only show launchable user apps, used > 1 minute, and exclude our own app
-            if (totalMillis > 60_000 && packageName in launchablePackages && packageName != context.packageName) {
-                try {
-                    val appInfo = pm.getApplicationInfo(packageName, 0)
-                    val appName = pm.getApplicationLabel(appInfo).toString()
-                    val icon = pm.getApplicationIcon(appInfo)
-                    
-                    appUsageList.add(
-                        AppUsageItem(
-                            packageName = packageName,
-                            appName = appName,
-                            icon = icon,
-                            usageMillis = totalMillis
-                        )
-                    )
-                } catch (e: Exception) {
-                    // Skip if fails
-                }
+            if (packageName in distractingPackages) {
+                totalDistractionMillis += totalMillis
             }
         }
-        
-        // Sort descending
-        return appUsageList.sortedByDescending { it.usageMillis }
+
+        return totalDistractionMillis / 1000 / 60
+    }
+
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
+
+    private fun getMidnightTimestamp(): Long {
+        return Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.timeInMillis
+    }
+
+    private fun getLaunchablePackages(): Set<String> {
+        val pm = context.packageManager
+        val mainIntent = Intent(Intent.ACTION_MAIN).apply {
+            addCategory(Intent.CATEGORY_LAUNCHER)
+        }
+        return pm.queryIntentActivities(mainIntent, 0)
+            .map { it.activityInfo.packageName }
+            .toSet()
+    }
+
+    companion object {
+        // Only show apps used for more than 1 second (filters out transient system touches)
+        private const val MIN_USAGE_THRESHOLD_MS = 1_000L
     }
 }

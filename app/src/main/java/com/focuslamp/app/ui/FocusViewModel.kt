@@ -213,9 +213,13 @@ class FocusViewModel(application: Application) : AndroidViewModel(application) {
     val weeklyUsage: LiveData<List<Long>> = _weeklyUsage
 
     fun loadDetailedStats() {
-        viewModelScope.launch {
-            _detailedAppUsage.value = screenTimeTracker.getAllAppsUsageToday()
-            _weeklyUsage.value = screenTimeTracker.getWeeklyUsage()
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            val usageList = screenTimeTracker.getAllAppsUsageToday()
+            val weeklyList = screenTimeTracker.getWeeklyUsage()
+            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                _detailedAppUsage.value = usageList
+                _weeklyUsage.value = weeklyList
+            }
         }
     }
 
