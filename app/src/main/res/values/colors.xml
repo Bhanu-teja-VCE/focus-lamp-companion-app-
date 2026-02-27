@@ -1,34 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Dark Theme Background -->
-    <color name="background_dark">#0F1123</color>
-    <color name="surface_dark">#1A1D2E</color>
+    <!-- ===== New Electric Blue Design System ===== -->
+
+    <!-- Primary Backgrounds -->
+    <color name="background_dark">#0F172A</color>     <!-- Deep Slate 900 -->
+    <color name="surface_dark">#1E293B</color>          <!-- Slate 800 (cards) -->
+    <color name="surface_border">#334155</color>         <!-- Slate 700 (borders) -->
+    <color name="surface_lighter">#1E293B</color>        <!-- For inputs -->
+
+    <!-- Primary Brand -->
+    <color name="primary">#3B82F6</color>                <!-- Electric Blue -->
+    <color name="primary_dark">#1D4ED8</color>           <!-- Darker Blue -->
+    <color name="primary_glow">#1A3B82F6</color>         <!-- Blue 10% opacity -->
+    <color name="primary_shadow">#403B82F6</color>        <!-- Blue 25% for shadows -->
 
     <!-- Accent Colors -->
-    <color name="accent_green">#4ADE80</color>
-    <color name="accent_blue">#60A5FA</color>
-    <color name="warning_red">#F87171</color>
-    <color name="warning_amber">#FBBF24</color>
+    <color name="accent_green">#22C55E</color>           <!-- Success Green -->
+    <color name="accent_green_bg">#1A22C55E</color>      <!-- Green 10% -->
+    <color name="accent_red">#EF4444</color>             <!-- Warning Red -->
+    <color name="accent_red_bg">#1AEF4444</color>        <!-- Red 10% -->
 
     <!-- Text Colors -->
-    <color name="text_white">#F1F5F9</color>
-    <color name="text_gray">#94A3B8</color>
+    <color name="text_white">#F1F5F9</color>             <!-- Slate 100 -->
+    <color name="text_secondary">#94A3B8</color>         <!-- Slate 400 -->
+    <color name="text_muted">#64748B</color>             <!-- Slate 500 -->
 
-    <!-- Session Colors -->
+    <!-- Session Feedback -->
     <color name="focus_green">#166534</color>
     <color name="focus_ended">#991B1B</color>
 
+    <!-- Status Indicator -->
+    <color name="status_offline">#94A3B8</color>
+    <color name="status_online">#22C55E</color>
+
+    <!-- Progress Bar -->
+    <color name="progress_track">#334155</color>
+
     <!-- Material Theme Override -->
-    <color name="colorPrimary">#4ADE80</color>
-    <color name="colorPrimaryVariant">#22C55E</color>
-    <color name="colorOnPrimary">#0F1123</color>
+    <color name="colorPrimary">#3B82F6</color>
+    <color name="colorPrimaryVariant">#1D4ED8</color>
+    <color name="colorOnPrimary">#FFFFFF</color>
     <color name="colorSecondary">#60A5FA</color>
     <color name="colorSecondaryVariant">#3B82F6</color>
-    <color name="colorOnSecondary">#0F1123</color>
-    <color name="colorSurface">#1A1D2E</color>
+    <color name="colorOnSecondary">#0F172A</color>
+    <color name="colorSurface">#1E293B</color>
     <color name="colorOnSurface">#F1F5F9</color>
-    <color name="colorError">#F87171</color>
-    <color name="colorOnError">#0F1123</color>
-    <color name="colorBackground">#0F1123</color>
+    <color name="colorError">#EF4444</color>
+    <color name="colorOnError">#FFFFFF</color>
+    <color name="colorBackground">#0F172A</color>
     <color name="colorOnBackground">#F1F5F9</color>
+
+    <!-- Backwards compat aliases -->
+    <color name="warning_red">#EF4444</color>
+    <color name="accent_blue">#3B82F6</color>
 </resources>

@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -17,7 +18,7 @@ import com.focuslamp.app.R
 import com.focuslamp.app.databinding.ActivityMainBinding
 
 /**
- * Main Activity — handles navigation, permission checks, and hosts all fragments.
+ * Main Activity — handles navigation, header, permission checks, and hosts fragments.
  */
 class MainActivity : AppCompatActivity() {
 
@@ -45,16 +46,40 @@ class MainActivity : AppCompatActivity() {
         val navController = navHostFragment.navController
 
         binding.bottomNavigation.setupWithNavController(navController)
+        
+        // Custom bottom navigation item handling for the middle lamp button and profile
+        binding.bottomNavigation.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_lamp -> {
+                    // Start Focus Timer Bottom Sheet directly
+                    val bottomSheet = FocusSetupBottomSheet()
+                    bottomSheet.show(supportFragmentManager, "FocusSetupBottomSheet")
+                    return@setOnItemSelectedListener false // don't check the item
+                }
+                R.id.nav_profile -> {
+                    Toast.makeText(this, "Profile coming soon!", Toast.LENGTH_SHORT).show()
+                    return@setOnItemSelectedListener false
+                }
+                else -> {
+                    // Let navigation controller handle the rest
+                    val handled = androidx.navigation.ui.NavigationUI.onNavDestinationSelected(item, navController)
+                    return@setOnItemSelectedListener handled
+                }
+            }
+        }
+
+        // Header settings button click
+        binding.btnHeaderSettings.setOnClickListener {
+            if (navController.currentDestination?.id != R.id.settingsFragment) {
+                navController.navigate(R.id.settingsFragment)
+            }
+        }
 
         // Check permissions on launch
         checkUsagePermission()
         checkNotificationPermission()
     }
 
-    /**
-     * Usage Access permission — must be enabled manually in Settings.
-     * Shows a dialog explaining why, then opens the Settings screen.
-     */
     private fun checkUsagePermission() {
         if (!viewModel.hasUsagePermission()) {
             AlertDialog.Builder(this)
@@ -72,9 +97,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Notification permission — required on Android 13+ for foreground service notification.
-     */
     private fun checkNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
