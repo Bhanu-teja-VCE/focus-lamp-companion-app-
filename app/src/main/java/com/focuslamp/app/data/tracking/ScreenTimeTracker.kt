@@ -137,19 +137,25 @@ class ScreenTimeTracker(private val context: Context) {
         val startTime = calendar.timeInMillis
         val endTime = System.currentTimeMillis()
 
-        // INTERVAL_BEST or INTERVAL_DAILY often returns multiple entries per package.
-        // We need to aggregate them using queryAndAggregateUsageStats if available,
-        // or manually sum them up. Map is the safest approach.
-        val usageStatsMap = usageStatsManager.queryAndAggregateUsageStats(
+        // Some custom Android skins (like Vivo/Xiaomi) have bugs with queryAndAggregateUsageStats
+        // The most reliable way is to query INTERVAL_DAILY and manually sum the components
+        val usageStatsList = usageStatsManager.queryUsageStats(
+            UsageStatsManager.INTERVAL_DAILY,
             startTime,
             endTime
-        ) ?: emptyMap()
+        ) ?: emptyList()
+
+        // Group by package name and sum the total time in foreground
+        val aggregatedStats = usageStatsList
+            .groupBy { it.packageName }
+            .mapValues { entry -> entry.value.sumOf { it.totalTimeInForeground } }
 
         val appUsageList = mutableListOf<AppUsageItem>()
         
-        for ((packageName, stats) in usageStatsMap) {
+        for ((packageName, totalMillis) in aggregatedStats) {
             // Only show apps used for more than 1 minute (60,000 ms)
-            if (stats.totalTimeInForeground > 60_000) {
+            // also filter out this own app to match digital wellbeing
+            if (totalMillis > 60_000 && packageName != context.packageName) {
                 try {
                     val appInfo = pm.getApplicationInfo(packageName, 0)
                     val appName = pm.getApplicationLabel(appInfo).toString()
@@ -160,7 +166,7 @@ class ScreenTimeTracker(private val context: Context) {
                             packageName = packageName,
                             appName = appName,
                             icon = icon,
-                            usageMillis = stats.totalTimeInForeground
+                            usageMillis = totalMillis
                         )
                     )
                 } catch (e: Exception) {
