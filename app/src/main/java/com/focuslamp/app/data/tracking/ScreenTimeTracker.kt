@@ -134,6 +134,13 @@ class ScreenTimeTracker(private val context: Context) {
             
         val pm = context.packageManager
 
+        // Get all packages that are actual "apps" with a launcher icon
+        val mainIntent = android.content.Intent(android.content.Intent.ACTION_MAIN).apply {
+            addCategory(android.content.Intent.CATEGORY_LAUNCHER)
+        }
+        val resolveInfos = pm.queryIntentActivities(mainIntent, 0)
+        val launchablePackages = resolveInfos.map { it.activityInfo.packageName }.toSet()
+
         val calendar = Calendar.getInstance().apply {
             set(Calendar.HOUR_OF_DAY, 0)
             set(Calendar.MINUTE, 0)
@@ -143,48 +150,18 @@ class ScreenTimeTracker(private val context: Context) {
         val startTime = calendar.timeInMillis
         val endTime = System.currentTimeMillis()
 
-        // Using queryEvents instead of queryUsageStats bypasses OEM aggregation bugs entirely.
-        // We'll iterate through every time an app was opened or closed today.
-        val usageEvents = usageStatsManager.queryEvents(startTime, endTime)
-        val event = android.app.usage.UsageEvents.Event()
-        
-        val appUsageMap = mutableMapOf<String, Long>()
-        val lastEventMap = mutableMapOf<String, Long>()
-        
-        while (usageEvents.hasNextEvent()) {
-            usageEvents.getNextEvent(event)
-            val packageName = event.packageName ?: continue
-            
-            // 1 = ACTIVITY_RESUMED, 2 = ACTIVITY_PAUSED
-            if (event.eventType == android.app.usage.UsageEvents.Event.ACTIVITY_RESUMED) {
-                lastEventMap[packageName] = event.timeStamp
-            } else if (event.eventType == android.app.usage.UsageEvents.Event.ACTIVITY_PAUSED ||
-                       event.eventType == android.app.usage.UsageEvents.Event.ACTIVITY_STOPPED) {
-                val lastTime = lastEventMap[packageName]
-                if (lastTime != null) {
-                    val duration = event.timeStamp - lastTime
-                    if (duration > 0) {
-                        appUsageMap[packageName] = (appUsageMap[packageName] ?: 0L) + duration
-                    }
-                    lastEventMap.remove(packageName)
-                }
-            }
-        }
-        
-        // Handle apps that are currently open (resumed but never paused yet)
-        for ((packageName, lastTime) in lastEventMap) {
-            val duration = endTime - lastTime
-            if (duration > 0) {
-                appUsageMap[packageName] = (appUsageMap[packageName] ?: 0L) + duration
-            }
-        }
+        // The most accurate system-aggregated stats map
+        val usageStatsMap = usageStatsManager.queryAndAggregateUsageStats(
+            startTime,
+            endTime
+        ) ?: emptyMap()
 
         val appUsageList = mutableListOf<AppUsageItem>()
         
-        for ((packageName, totalMillis) in appUsageMap) {
-            // Only show apps used for more than 1 minute (60,000 ms)
-            // also filter out this own app to match digital wellbeing
-            if (totalMillis > 60_000 && packageName != context.packageName) {
+        for ((packageName, stats) in usageStatsMap) {
+            val totalMillis = stats.totalTimeInForeground
+            // Only show launchable user apps, used > 1 minute, and exclude our own app
+            if (totalMillis > 60_000 && packageName in launchablePackages && packageName != context.packageName) {
                 try {
                     val appInfo = pm.getApplicationInfo(packageName, 0)
                     val appName = pm.getApplicationLabel(appInfo).toString()
@@ -199,7 +176,7 @@ class ScreenTimeTracker(private val context: Context) {
                         )
                     )
                 } catch (e: Exception) {
-                    // Package not found or system app, skip
+                    // Skip if fails
                 }
             }
         }
