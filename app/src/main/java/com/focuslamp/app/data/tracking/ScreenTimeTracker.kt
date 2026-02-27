@@ -60,19 +60,25 @@ class ScreenTimeTracker(private val context: Context) {
     }
 
     /**
-     * Checks if the app has Usage Access permission.
+     * Checks if the app has Usage Access permission using AppOpsManager.
      */
     fun hasUsagePermission(): Boolean {
-        val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as? UsageStatsManager
+        val appOpsManager = context.getSystemService(Context.APP_OPS_SERVICE) as? android.app.AppOpsManager
             ?: return false
-
-        val calendar = Calendar.getInstance()
-        val endTime = calendar.timeInMillis
-        calendar.add(Calendar.MINUTE, -1)
-        val startTime = calendar.timeInMillis
-
-        val stats = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, startTime, endTime)
-        return stats != null && stats.isNotEmpty()
+        val mode = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            appOpsManager.unsafeCheckOpNoThrow(
+                android.app.AppOpsManager.OPSTR_GET_USAGE_STATS,
+                android.os.Process.myUid(),
+                context.packageName
+            )
+        } else {
+            appOpsManager.checkOpNoThrow(
+                android.app.AppOpsManager.OPSTR_GET_USAGE_STATS,
+                android.os.Process.myUid(),
+                context.packageName
+            )
+        }
+        return mode == android.app.AppOpsManager.MODE_ALLOWED
     }
 
     /**
@@ -137,22 +143,45 @@ class ScreenTimeTracker(private val context: Context) {
         val startTime = calendar.timeInMillis
         val endTime = System.currentTimeMillis()
 
-        // Some custom Android skins (like Vivo/Xiaomi) have bugs with queryAndAggregateUsageStats
-        // The most reliable way is to query INTERVAL_DAILY and manually sum the components
-        val usageStatsList = usageStatsManager.queryUsageStats(
-            UsageStatsManager.INTERVAL_DAILY,
-            startTime,
-            endTime
-        ) ?: emptyList()
-
-        // Group by package name and sum the total time in foreground
-        val aggregatedStats = usageStatsList
-            .groupBy { it.packageName }
-            .mapValues { entry -> entry.value.sumOf { it.totalTimeInForeground } }
+        // Using queryEvents instead of queryUsageStats bypasses OEM aggregation bugs entirely.
+        // We'll iterate through every time an app was opened or closed today.
+        val usageEvents = usageStatsManager.queryEvents(startTime, endTime)
+        val event = android.app.usage.UsageEvents.Event()
+        
+        val appUsageMap = mutableMapOf<String, Long>()
+        val lastEventMap = mutableMapOf<String, Long>()
+        
+        while (usageEvents.hasNextEvent()) {
+            usageEvents.getNextEvent(event)
+            val packageName = event.packageName ?: continue
+            
+            // 1 = ACTIVITY_RESUMED, 2 = ACTIVITY_PAUSED
+            if (event.eventType == android.app.usage.UsageEvents.Event.ACTIVITY_RESUMED) {
+                lastEventMap[packageName] = event.timeStamp
+            } else if (event.eventType == android.app.usage.UsageEvents.Event.ACTIVITY_PAUSED ||
+                       event.eventType == android.app.usage.UsageEvents.Event.ACTIVITY_STOPPED) {
+                val lastTime = lastEventMap[packageName]
+                if (lastTime != null) {
+                    val duration = event.timeStamp - lastTime
+                    if (duration > 0) {
+                        appUsageMap[packageName] = (appUsageMap[packageName] ?: 0L) + duration
+                    }
+                    lastEventMap.remove(packageName)
+                }
+            }
+        }
+        
+        // Handle apps that are currently open (resumed but never paused yet)
+        for ((packageName, lastTime) in lastEventMap) {
+            val duration = endTime - lastTime
+            if (duration > 0) {
+                appUsageMap[packageName] = (appUsageMap[packageName] ?: 0L) + duration
+            }
+        }
 
         val appUsageList = mutableListOf<AppUsageItem>()
         
-        for ((packageName, totalMillis) in aggregatedStats) {
+        for ((packageName, totalMillis) in appUsageMap) {
             // Only show apps used for more than 1 minute (60,000 ms)
             // also filter out this own app to match digital wellbeing
             if (totalMillis > 60_000 && packageName != context.packageName) {
