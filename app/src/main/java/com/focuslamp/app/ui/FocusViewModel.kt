@@ -214,6 +214,9 @@ class FocusViewModel(application: Application) : AndroidViewModel(application) {
 
     fun loadDetailedStats() {
         viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            // DIAGNOSTICS FOR VIVO OEM BUG (To be removed later)
+            screenTimeTracker.debugRawEvents()
+            
             val usageList = screenTimeTracker.getAllAppsUsageToday()
             val weeklyList = screenTimeTracker.getWeeklyUsage()
             kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {

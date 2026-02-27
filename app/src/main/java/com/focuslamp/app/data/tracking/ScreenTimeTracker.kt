@@ -228,6 +228,36 @@ class ScreenTimeTracker(private val context: Context) {
             .toSet()
     }
 
+    fun debugRawEvents() {
+        val usageStatsManager =
+            context.getSystemService(Context.USAGE_STATS_SERVICE) as? UsageStatsManager ?: return
+
+        val startTime = getMidnightTimestamp()
+        val endTime = System.currentTimeMillis()
+
+        android.util.Log.d("ScreenTimeDebug", "=== QUERY WINDOW ===")
+        android.util.Log.d("ScreenTimeDebug", "Start: ${java.util.Date(startTime)}")
+        android.util.Log.d("ScreenTimeDebug", "End:   ${java.util.Date(endTime)}")
+        android.util.Log.d("ScreenTimeDebug", "Window duration: ${(endTime - startTime) / 60000} minutes")
+
+        val usageEvents = usageStatsManager.queryEvents(startTime, endTime)
+        val event = UsageEvents.Event()
+        var eventCount = 0
+
+        while (usageEvents.hasNextEvent()) {
+            usageEvents.getNextEvent(event)
+            eventCount++
+
+            // Log every event type we see — this reveals what Vivo actually emits
+            android.util.Log.d(
+                "ScreenTimeDebug",
+                "EVENT | type=${event.eventType} | pkg=${event.packageName} | time=${java.util.Date(event.timeStamp)}"
+            )
+        }
+
+        android.util.Log.d("ScreenTimeDebug", "=== TOTAL EVENTS: $eventCount ===")
+    }
+
     companion object {
         // Only show apps used for more than 1 second (filters out transient system touches)
         private const val MIN_USAGE_THRESHOLD_MS = 1_000L
