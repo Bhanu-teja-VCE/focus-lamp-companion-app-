@@ -2,6 +2,7 @@ package com.focuslamp.app.data.tracking
 
 import android.app.AppOpsManager
 import android.app.usage.UsageEvents
+import android.app.usage.UsageStats
 import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.content.Intent
@@ -22,7 +23,7 @@ class ScreenTimeTracker(private val context: Context) {
      * Check if the user has granted Usage Access permission.
      * Direct the user to Settings > Apps > Special app access > Usage access if false.
      */
-    fun hasUsageAccessPermission(): Boolean {
+    fun hasUsagePermission(): Boolean {
         val appOpsManager = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
         val mode = appOpsManager.checkOpNoThrow(
             AppOpsManager.OPSTR_GET_USAGE_STATS,
@@ -51,7 +52,7 @@ class ScreenTimeTracker(private val context: Context) {
      *     close it against the current time so live usage is included.
      */
     fun getAllAppsUsageToday(): List<AppUsageItem> {
-        if (!hasUsageAccessPermission()) return emptyList()
+        if (!hasUsagePermission()) return emptyList()
 
         val usageStatsManager =
             context.getSystemService(Context.USAGE_STATS_SERVICE) as? UsageStatsManager
@@ -199,7 +200,7 @@ class ScreenTimeTracker(private val context: Context) {
 
         val aggregatedStats = usageStatsList
             .groupBy { it.packageName }
-            .mapValues { entry -> entry.value.sumOf { it.totalTimeInForeground } }
+            .mapValues { entry -> entry.value.sumOf { stats: UsageStats -> stats.totalTimeInForeground } }
 
         for ((packageName, totalMillis) in aggregatedStats) {
             if (packageName in distractingPackages) {
