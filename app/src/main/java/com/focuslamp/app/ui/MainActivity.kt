@@ -16,6 +16,7 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.focuslamp.app.R
 import com.focuslamp.app.databinding.ActivityMainBinding
+import com.focuslamp.app.data.tracking.ScreenTimeTracker
 
 /**
  * Main Activity — handles navigation, header, permission checks, and hosts fragments.
@@ -34,6 +35,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // ADD THIS LINE:
+        ScreenTimeTracker(this).debugRawEvents()
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
