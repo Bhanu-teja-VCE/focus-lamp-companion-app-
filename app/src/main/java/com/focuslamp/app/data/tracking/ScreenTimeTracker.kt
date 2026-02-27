@@ -137,25 +137,27 @@ class ScreenTimeTracker(private val context: Context) {
         val startTime = calendar.timeInMillis
         val endTime = System.currentTimeMillis()
 
-        val usageStatsList = usageStatsManager.queryUsageStats(
-            UsageStatsManager.INTERVAL_DAILY,
+        // INTERVAL_BEST or INTERVAL_DAILY often returns multiple entries per package.
+        // We need to aggregate them using queryAndAggregateUsageStats if available,
+        // or manually sum them up. Map is the safest approach.
+        val usageStatsMap = usageStatsManager.queryAndAggregateUsageStats(
             startTime,
             endTime
-        ) ?: emptyList()
+        ) ?: emptyMap()
 
         val appUsageList = mutableListOf<AppUsageItem>()
         
-        for (stats in usageStatsList) {
-            // Only show apps used for more than 1 minute
+        for ((packageName, stats) in usageStatsMap) {
+            // Only show apps used for more than 1 minute (60,000 ms)
             if (stats.totalTimeInForeground > 60_000) {
                 try {
-                    val appInfo = pm.getApplicationInfo(stats.packageName, 0)
+                    val appInfo = pm.getApplicationInfo(packageName, 0)
                     val appName = pm.getApplicationLabel(appInfo).toString()
                     val icon = pm.getApplicationIcon(appInfo)
                     
                     appUsageList.add(
                         AppUsageItem(
-                            packageName = stats.packageName,
+                            packageName = packageName,
                             appName = appName,
                             icon = icon,
                             usageMillis = stats.totalTimeInForeground
