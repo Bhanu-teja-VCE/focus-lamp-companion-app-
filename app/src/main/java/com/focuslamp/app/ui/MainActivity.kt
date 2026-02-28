@@ -35,9 +35,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
-        // ADD THIS LINE:
-        ScreenTimeTracker(this).debugRawEvents()
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
