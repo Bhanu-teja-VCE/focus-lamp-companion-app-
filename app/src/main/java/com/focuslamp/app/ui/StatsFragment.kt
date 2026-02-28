@@ -54,12 +54,8 @@ class StatsFragment : Fragment(R.layout.fragment_stats) {
         // Hide the app list since the OS block prevents granular data
         rvAppsUsage.visibility = View.GONE
 
-        // Observe weekly overall usage for the bar chart
-        viewModel.weeklyUsage.observe(viewLifecycleOwner) { weeklyMins ->
-            if (weeklyMins.size == 7) {
-                buildBarChart(chartContainer, weeklyMins)
-            }
-        }
+        // Hide the chart since weekly tracking requires app-specific data we no longer collect
+        chartContainer.visibility = View.GONE
 
         // Request data load
         viewModel.loadDetailedStats()
