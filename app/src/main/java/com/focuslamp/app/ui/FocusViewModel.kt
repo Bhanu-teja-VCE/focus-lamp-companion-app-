@@ -85,11 +85,12 @@ class FocusViewModel(application: Application) : AndroidViewModel(application) {
     // ===========================
 
     fun refreshScreenTime() {
-        viewModelScope.launch {
-            val apps = distractingAppsManager.getAll()
-            val minutes = screenTimeTracker.getDistractionTimeToday(apps)
-            _distractionMinutes.value = minutes
-            _isLimitExceeded.value = minutes >= settingsManager.timeLimitMinutes
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            val minutes = screenTimeTracker.getTotalScreenTimeToday()
+            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                _distractionMinutes.value = minutes
+                _isLimitExceeded.value = minutes >= settingsManager.timeLimitMinutes
+            }
         }
     }
 
@@ -206,24 +207,12 @@ class FocusViewModel(application: Application) : AndroidViewModel(application) {
     // Statistics
     // ===========================
 
-    private val _detailedAppUsage = MutableLiveData<List<com.focuslamp.app.data.tracking.AppUsageItem>>()
-    val detailedAppUsage: LiveData<List<com.focuslamp.app.data.tracking.AppUsageItem>> = _detailedAppUsage
-
-    private val _weeklyUsage = MutableLiveData<List<Long>>()
-    val weeklyUsage: LiveData<List<Long>> = _weeklyUsage
+    // Note: Detailed App Usage and Weekly Usage were removed due to device limitations.
+    // The UI will now display Total Screen Time instead.
 
     fun loadDetailedStats() {
-        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
-            // DIAGNOSTICS FOR VIVO OEM BUG (To be removed later)
-            screenTimeTracker.debugRawEvents()
-            
-            val usageList = screenTimeTracker.getAllAppsUsageToday()
-            val weeklyList = screenTimeTracker.getWeeklyUsage()
-            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
-                _detailedAppUsage.value = usageList
-                _weeklyUsage.value = weeklyList
-            }
-        }
+        // Just trigger a refresh of the total screen time so the UI gets the latest number
+        refreshScreenTime()
     }
 
     fun loadStats() {

@@ -39,15 +39,8 @@ class StatsFragment : Fragment(R.layout.fragment_stats) {
         val sdf = SimpleDateFormat("EEE, MMM d", Locale.getDefault())
         tvCurrentDate.text = sdf.format(Calendar.getInstance().time)
 
-        // Observe granular app usage
-        viewModel.detailedAppUsage.observe(viewLifecycleOwner) { usageList ->
-            adapter.submitList(usageList)
-            
-            // Calculate total time
-            var totalMillis = 0L
-            usageList.forEach { totalMillis += it.usageMillis }
-            
-            val minutes = totalMillis / 1000 / 60
+        // Observe Total Screen Time
+        viewModel.distractionMinutes.observe(viewLifecycleOwner) { minutes ->
             val hours = minutes / 60
             val remMins = minutes % 60
             
@@ -57,6 +50,9 @@ class StatsFragment : Fragment(R.layout.fragment_stats) {
                 tvTotalTimeToday.text = "0 hr, $minutes min"
             }
         }
+        
+        // Hide the app list since the OS block prevents granular data
+        rvAppsUsage.visibility = View.GONE
 
         // Observe weekly overall usage for the bar chart
         viewModel.weeklyUsage.observe(viewLifecycleOwner) { weeklyMins ->

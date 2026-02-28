@@ -103,8 +103,7 @@ class FocusMonitorService : Service() {
 
             while (isActive) {
                 try {
-                    val distractingApps = distractingAppsManager.getAll()
-                    val distractionMinutes = screenTimeTracker.getDistractionTimeToday(distractingApps)
+                    val distractionMinutes = screenTimeTracker.getTotalScreenTimeToday()
                     val limit = settingsManager.timeLimitMinutes
 
                     Log.d(TAG, "Distraction: ${distractionMinutes}min / Limit: ${limit}min")
