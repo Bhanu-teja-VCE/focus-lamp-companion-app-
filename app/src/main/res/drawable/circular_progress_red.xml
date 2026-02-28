@@ -10,7 +10,7 @@
             <solid android:color="#334155" />
         </shape>
     </item>
-    <!-- Progress (electric blue) -->
+    <!-- Progress (electric red) -->
     <item>
         <rotate
             android:fromDegrees="0"
@@ -20,7 +20,7 @@
                 android:thickness="8dp"
                 android:useLevel="true"
                 android:innerRadiusRatio="2.5">
-                <solid android:color="#3B82F6" />
+                <solid android:color="#EF4444" />
             </shape>
         </rotate>
     </item>

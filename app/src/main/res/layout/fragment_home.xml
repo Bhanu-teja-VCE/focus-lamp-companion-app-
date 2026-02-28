@@ -25,83 +25,113 @@
             android:gravity="center"
             android:paddingVertical="20dp">
 
-            <!-- Circular Progress Ring Container -->
-            <FrameLayout
-                android:layout_width="220dp"
-                android:layout_height="220dp"
-                android:layout_gravity="center">
+            <!-- Dual Rings Container -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:baselineAligned="false">
 
-                <ProgressBar
-                    android:id="@+id/progressScreenTime"
-                    style="?android:attr/progressBarStyleHorizontal"
-                    android:layout_width="220dp"
-                    android:layout_height="220dp"
-                    android:indeterminate="false"
-                    android:max="100"
-                    android:progress="0"
-                    android:progressDrawable="@drawable/circular_progress"
-                    android:rotation="-90" />
+                <!-- Circle 1: TOTAL FOCUS -->
+                <FrameLayout
+                    android:layout_width="0dp"
+                    android:layout_height="145dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="4dp">
 
-                <!-- Inner Text -->
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:layout_gravity="center">
+                    <ProgressBar
+                        android:id="@+id/progressFocusTime"
+                        style="?android:attr/progressBarStyleHorizontal"
+                        android:layout_width="145dp"
+                        android:layout_height="145dp"
+                        android:layout_gravity="center"
+                        android:indeterminate="false"
+                        android:max="100"
+                        android:progress="0"
+                        android:progressDrawable="@drawable/circular_progress"
+                        android:rotation="-90" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="TOTAL FOCUS"
-                        android:textSize="11sp"
-                        android:textColor="@color/text_secondary"
-                        android:letterSpacing="0.15"
-                        android:textStyle="bold"
-                        android:layout_marginBottom="4dp" />
-
-                    <TextView
-                        android:id="@+id/tvTotalFocusTime"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="0h 0m"
-                        android:textSize="36sp"
-                        android:textColor="@color/text_white"
-                        android:textStyle="bold" />
-
-                    <!-- Trending Badge -->
+                    <!-- Inner Text -->
                     <LinearLayout
-                        android:id="@+id/badgeTrending"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
+                        android:orientation="vertical"
                         android:gravity="center"
-                        android:background="@drawable/bg_badge_green"
-                        android:paddingHorizontal="12dp"
-                        android:paddingVertical="4dp"
-                        android:layout_marginTop="8dp">
+                        android:layout_gravity="center">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="↑ "
-                            android:textSize="12sp"
-                            android:textColor="@color/accent_green" />
+                            android:text="TOTAL FOCUS"
+                            android:textSize="9sp"
+                            android:textColor="@color/text_secondary"
+                            android:letterSpacing="0.15"
+                            android:textStyle="bold"
+                            android:layout_marginBottom="2dp" />
 
                         <TextView
-                            android:id="@+id/tvTrendBadge"
+                            android:id="@+id/tvTotalFocusTime"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Today"
-                            android:textSize="11sp"
-                            android:textColor="@color/accent_green"
+                            android:text="0h 0m"
+                            android:textSize="22sp"
+                            android:textColor="@color/text_white"
                             android:textStyle="bold" />
 
                     </LinearLayout>
+                </FrameLayout>
 
-                </LinearLayout>
+                <!-- Circle 2: SCREEN TIME -->
+                <FrameLayout
+                    android:layout_width="0dp"
+                    android:layout_height="145dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="4dp">
 
-            </FrameLayout>
+                    <ProgressBar
+                        android:id="@+id/progressScreenTimeRing"
+                        style="?android:attr/progressBarStyleHorizontal"
+                        android:layout_width="145dp"
+                        android:layout_height="145dp"
+                        android:layout_gravity="center"
+                        android:indeterminate="false"
+                        android:max="100"
+                        android:progress="0"
+                        android:progressDrawable="@drawable/circular_progress_red"
+                        android:rotation="-90" />
+
+                    <!-- Inner Text -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:layout_gravity="center">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="SCREEN TIME"
+                            android:textSize="9sp"
+                            android:textColor="@color/text_secondary"
+                            android:letterSpacing="0.15"
+                            android:textStyle="bold"
+                            android:layout_marginBottom="2dp" />
+
+                        <TextView
+                            android:id="@+id/tvTotalScreenTimeRing"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0h 0m"
+                            android:textSize="22sp"
+                            android:textColor="@color/text_white"
+                            android:textStyle="bold" />
+
+                    </LinearLayout>
+                </FrameLayout>
+
+            </LinearLayout>
 
         </LinearLayout>
 

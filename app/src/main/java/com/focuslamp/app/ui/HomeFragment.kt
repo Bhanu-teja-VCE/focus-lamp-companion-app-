@@ -28,9 +28,12 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         val settingsManager = SettingsManager(requireContext())
 
         // === Find all views ===
-        val progressRing = view.findViewById<ProgressBar>(R.id.progressScreenTime)
+        val progressFocusRing = view.findViewById<ProgressBar>(R.id.progressFocusTime)
         val tvTotalFocus = view.findViewById<TextView>(R.id.tvTotalFocusTime)
         val tvTrend = view.findViewById<TextView>(R.id.tvTrendBadge)
+
+        val progressScreenRing = view.findViewById<ProgressBar>(R.id.progressScreenTimeRing)
+        val tvTotalScreenTimeRing = view.findViewById<TextView>(R.id.tvTotalScreenTimeRing)
 
         val tvProductiveTime = view.findViewById<TextView>(R.id.tvProductiveTime)
         val tvProductivePercent = view.findViewById<TextView>(R.id.tvProductivePercent)
@@ -71,7 +74,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
             // Ring progress — based on daily goal (8 hours = 480 min)
             val goalProgress = ((minutes.toFloat() / 480) * 100).toInt().coerceAtMost(100)
-            progressRing.progress = goalProgress
+            progressFocusRing.progress = goalProgress
             progressProductive.progress = goalProgress
 
             tvDailyGoalPercent.text = "${goalProgress}%"
@@ -90,10 +93,17 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
         // === Observe Distraction Time ===
         viewModel.distractionMinutes.observe(viewLifecycleOwner) { minutes ->
+            // Update distraction card
             tvDistractionTime.text = "${minutes}m"
             val limit = viewModel.timeLimitMinutes.value ?: 30
             val progress = if (limit > 0) ((minutes.toFloat() / limit) * 100).toInt().coerceAtMost(100) else 0
             progressDistraction.progress = progress
+
+            // Update new Screen Time ring
+            val hours = minutes / 60
+            val mins = minutes % 60
+            tvTotalScreenTimeRing.text = "${hours}h ${mins}m"
+            progressScreenRing.progress = progress
         }
 
         viewModel.timeLimitMinutes.observe(viewLifecycleOwner) { limit ->
