@@ -16,7 +16,6 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.focuslamp.app.R
 import com.focuslamp.app.databinding.ActivityMainBinding
-import com.focuslamp.app.data.tracking.ScreenTimeTracker
 
 /**
  * Main Activity — handles navigation, header, permission checks, and hosts fragments.
