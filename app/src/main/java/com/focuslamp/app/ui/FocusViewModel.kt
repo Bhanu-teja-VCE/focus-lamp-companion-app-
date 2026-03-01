@@ -70,6 +70,10 @@ class FocusViewModel(application: Application) : AndroidViewModel(application) {
     private val _sessionHistory = MutableLiveData<List<SessionEntity>>(emptyList())
     val sessionHistory: LiveData<List<SessionEntity>> = _sessionHistory
 
+    // === Per-App Usage ===
+    private val _perAppUsage = MutableLiveData<List<com.focuslamp.app.data.tracking.ScreenTimeTracker.AppUsageInfo>>(emptyList())
+    val perAppUsage: LiveData<List<com.focuslamp.app.data.tracking.ScreenTimeTracker.AppUsageInfo>> = _perAppUsage
+
     // === ESP32 IP ===
     private val _espIp = MutableLiveData(settingsManager.espIp)
     val espIp: LiveData<String> = _espIp
@@ -90,6 +94,15 @@ class FocusViewModel(application: Application) : AndroidViewModel(application) {
             kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
                 _distractionMinutes.value = minutes
                 _isLimitExceeded.value = minutes >= settingsManager.timeLimitMinutes
+            }
+        }
+    }
+
+    fun loadPerAppUsage() {
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            val apps = screenTimeTracker.getPerAppUsageToday()
+            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                _perAppUsage.value = apps
             }
         }
     }

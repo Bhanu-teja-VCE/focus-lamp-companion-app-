@@ -87,6 +87,65 @@ class ScreenTimeTracker(private val context: Context) {
     }
 
     // -------------------------------------------------------------------------
+    // Per-App Usage (using queryAndAggregateUsageStats — more Vivo-compatible)
+    // -------------------------------------------------------------------------
+
+    data class AppUsageInfo(
+        val packageName: String,
+        val appName: String,
+        val icon: Drawable?,
+        val usageMinutes: Long
+    )
+
+    /**
+     * Returns a list of apps with their individual foreground usage today,
+     * sorted by most usage first.
+     *
+     * Uses queryAndAggregateUsageStats which pre-aggregates per-app data
+     * and is less susceptible to Vivo OEM event suppression.
+     */
+    fun getPerAppUsageToday(): List<AppUsageInfo> {
+        if (!hasUsagePermission()) return emptyList()
+
+        val usageStatsManager =
+            context.getSystemService(Context.USAGE_STATS_SERVICE) as? UsageStatsManager
+                ?: return emptyList()
+
+        val endTime = System.currentTimeMillis()
+        val startTime = getMidnightTimestamp()
+
+        val aggregateStats = usageStatsManager.queryAndAggregateUsageStats(startTime, endTime)
+        val pm = context.packageManager
+
+        val results = mutableListOf<AppUsageInfo>()
+
+        for ((packageName, stats) in aggregateStats) {
+            val totalTimeMs = stats.totalTimeInForeground
+            if (totalTimeMs > 60_000) { // Only show apps with > 1 minute usage
+                val minutes = totalTimeMs / (1000 * 60)
+
+                // Try to get app name and icon
+                val appName = try {
+                    val appInfo = pm.getApplicationInfo(packageName, 0)
+                    pm.getApplicationLabel(appInfo).toString()
+                } catch (e: PackageManager.NameNotFoundException) {
+                    packageName
+                }
+
+                val icon = try {
+                    pm.getApplicationIcon(packageName)
+                } catch (e: PackageManager.NameNotFoundException) {
+                    null
+                }
+
+                results.add(AppUsageInfo(packageName, appName, icon, minutes))
+            }
+        }
+
+        return results.sortedByDescending { it.usageMinutes }
+    }
+
+    // -------------------------------------------------------------------------
     // Helpers
     // -------------------------------------------------------------------------
 

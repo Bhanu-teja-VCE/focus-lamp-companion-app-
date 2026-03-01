@@ -47,23 +47,6 @@ class MainActivity : AppCompatActivity() {
         val navController = navHostFragment.navController
 
         binding.bottomNavigation.setupWithNavController(navController)
-        
-        // Custom bottom navigation item handling for the middle lamp button
-        binding.bottomNavigation.setOnItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.nav_lamp -> {
-                    // Start Focus Timer Bottom Sheet directly
-                    val bottomSheet = FocusSetupBottomSheet()
-                    bottomSheet.show(supportFragmentManager, "FocusSetupBottomSheet")
-                    return@setOnItemSelectedListener false // don't check the item
-                }
-                else -> {
-                    // Let navigation controller handle the rest
-                    val handled = androidx.navigation.ui.NavigationUI.onNavDestinationSelected(item, navController)
-                    return@setOnItemSelectedListener handled
-                }
-            }
-        }
 
         // Header settings button click
         binding.btnHeaderSettings.setOnClickListener {

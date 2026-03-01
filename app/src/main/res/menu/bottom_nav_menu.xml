@@ -12,9 +12,9 @@
         android:title="History" />
 
     <item
-        android:id="@+id/nav_lamp"
+        android:id="@+id/lampFragment"
         android:icon="@drawable/ic_lamp"
-        android:title="" />
+        android:title="Lamp" />
 
     <item
         android:id="@+id/settingsFragment"

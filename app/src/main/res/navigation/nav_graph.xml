@@ -48,4 +48,10 @@
         android:label="Stats"
         tools:layout="@layout/fragment_stats" />
 
+    <fragment
+        android:id="@+id/lampFragment"
+        android:name="com.focuslamp.app.ui.LampFragment"
+        android:label="Lamp"
+        tools:layout="@layout/fragment_lamp" />
+
 </navigation>
