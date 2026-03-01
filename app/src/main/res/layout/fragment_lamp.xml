@@ -153,26 +153,6 @@
 
         </LinearLayout>
 
-        <!-- ========================================= -->
-        <!--  SECTION 3: Per-App Screen Time List      -->
-        <!-- ========================================= -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="App Usage Today"
-            android:textSize="17sp"
-            android:textColor="@color/text_white"
-            android:textStyle="bold"
-            android:layout_marginBottom="12dp"
-            android:paddingStart="4dp" />
-
-        <LinearLayout
-            android:id="@+id/layoutAppUsageList"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginBottom="24dp" />
-
     </LinearLayout>
 
 </ScrollView>

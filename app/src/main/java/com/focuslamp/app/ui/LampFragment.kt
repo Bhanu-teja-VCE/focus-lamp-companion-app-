@@ -39,8 +39,6 @@ class LampFragment : Fragment(R.layout.fragment_lamp) {
         val btnSetLimit = view.findViewById<Button>(R.id.btnSetLimit)
         val tvCurrentLimit = view.findViewById<TextView>(R.id.tvCurrentLimit)
 
-        val layoutAppUsageList = view.findViewById<LinearLayout>(R.id.layoutAppUsageList)
-
         // Show current limit
         val currentLimit = settingsManager.timeLimitMinutes
         tvCurrentLimit.text = "Current limit: ${currentLimit} min"
@@ -72,83 +70,8 @@ class LampFragment : Fragment(R.layout.fragment_lamp) {
             tvLampDetail.text = "${currentScreenTime}m used of ${limit}m limit"
         }
 
-        // === Observe Per-App Usage ===
-        viewModel.perAppUsage.observe(viewLifecycleOwner) { appList ->
-            layoutAppUsageList.removeAllViews()
-
-            if (appList.isEmpty()) {
-                val emptyView = TextView(requireContext()).apply {
-                    text = "No app usage data yet. Make sure Usage Access is enabled."
-                    setTextColor(Color.parseColor("#94A3B8"))
-                    textSize = 13f
-                    setPadding(0, 16, 0, 16)
-                }
-                layoutAppUsageList.addView(emptyView)
-                return@observe
-            }
-
-            for (app in appList) {
-                val row = LinearLayout(requireContext()).apply {
-                    orientation = LinearLayout.HORIZONTAL
-                    gravity = android.view.Gravity.CENTER_VERTICAL
-                    setPadding(16, 14, 16, 14)
-                    val bg = GradientDrawable().apply {
-                        shape = GradientDrawable.RECTANGLE
-                        cornerRadius = 16f
-                        setColor(Color.parseColor("#1E293B"))
-                    }
-                    background = bg
-                    val params = LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                    )
-                    params.bottomMargin = 8
-                    layoutParams = params
-                }
-
-                // App icon
-                val icon = ImageView(requireContext()).apply {
-                    val size = (40 * resources.displayMetrics.density).toInt()
-                    layoutParams = LinearLayout.LayoutParams(size, size).apply {
-                        marginEnd = (12 * resources.displayMetrics.density).toInt()
-                    }
-                    if (app.icon != null) {
-                        setImageDrawable(app.icon)
-                    } else {
-                        setImageResource(R.drawable.ic_lamp)
-                    }
-                }
-                row.addView(icon)
-
-                // App name
-                val name = TextView(requireContext()).apply {
-                    text = app.appName
-                    setTextColor(Color.WHITE)
-                    textSize = 14f
-                    layoutParams = LinearLayout.LayoutParams(
-                        0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f
-                    )
-                }
-                row.addView(name)
-
-                // Usage time
-                val time = TextView(requireContext()).apply {
-                    val h = app.usageMinutes / 60
-                    val m = app.usageMinutes % 60
-                    text = if (h > 0) "${h}h ${m}m" else "${m}m"
-                    setTextColor(Color.parseColor("#3B82F6"))
-                    textSize = 14f
-                    setTypeface(typeface, android.graphics.Typeface.BOLD)
-                }
-                row.addView(time)
-
-                layoutAppUsageList.addView(row)
-            }
-        }
-
         // Refresh data
         viewModel.refreshScreenTime()
-        viewModel.loadPerAppUsage()
     }
 
     /**

@@ -76,12 +76,23 @@
                 android:gravity="center"
                 android:layout_marginBottom="16dp" />
 
-            <!-- RecyclerView for Apps -->
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvAppsUsage"
+            <!-- Per-App Usage Header -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="App Usage Today"
+                android:textSize="17sp"
+                android:textColor="@color/text_white"
+                android:textStyle="bold"
+                android:layout_marginBottom="12dp" />
+
+            <!-- Per-App Usage List (built dynamically) -->
+            <LinearLayout
+                android:id="@+id/layoutAppUsageList"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:nestedScrollingEnabled="false" />
+                android:orientation="vertical"
+                android:layout_marginBottom="80dp" />
 
         </LinearLayout>
     </ScrollView>
