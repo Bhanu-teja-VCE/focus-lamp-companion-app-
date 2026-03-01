@@ -94,17 +94,15 @@ class ScreenTimeTracker(private val context: Context) {
         val packageName: String,
         val appName: String,
         val icon: Drawable?,
-        val usageMinutes: Long
+        val usageMinutes: Long,
+        val isDistracting: Boolean = false
     )
 
     /**
      * Returns a list of apps with their individual foreground usage today,
-     * sorted by most usage first.
-     *
-     * Uses queryAndAggregateUsageStats which pre-aggregates per-app data
-     * and is less susceptible to Vivo OEM event suppression.
+     * sorted by most usage first. Marks apps in the distracting set.
      */
-    fun getPerAppUsageToday(): List<AppUsageInfo> {
+    fun getPerAppUsageToday(distractingPackages: Set<String> = emptySet()): List<AppUsageInfo> {
         if (!hasUsagePermission()) return emptyList()
 
         val usageStatsManager =
@@ -124,7 +122,6 @@ class ScreenTimeTracker(private val context: Context) {
             if (totalTimeMs > 60_000) { // Only show apps with > 1 minute usage
                 val minutes = totalTimeMs / (1000 * 60)
 
-                // Try to get app name and icon
                 val appName = try {
                     val appInfo = pm.getApplicationInfo(packageName, 0)
                     pm.getApplicationLabel(appInfo).toString()
@@ -138,11 +135,38 @@ class ScreenTimeTracker(private val context: Context) {
                     null
                 }
 
-                results.add(AppUsageInfo(packageName, appName, icon, minutes))
+                val isDistracting = distractingPackages.contains(packageName)
+                results.add(AppUsageInfo(packageName, appName, icon, minutes, isDistracting))
             }
         }
 
         return results.sortedByDescending { it.usageMinutes }
+    }
+
+    /**
+     * Returns the total screen time (in minutes) for only the apps
+     * the user has marked as "distracting".
+     */
+    fun getDistractionTimeOnly(distractingPackages: Set<String>): Long {
+        if (!hasUsagePermission() || distractingPackages.isEmpty()) return 0L
+
+        val usageStatsManager =
+            context.getSystemService(Context.USAGE_STATS_SERVICE) as? UsageStatsManager
+                ?: return 0L
+
+        val endTime = System.currentTimeMillis()
+        val startTime = getMidnightTimestamp()
+
+        val aggregateStats = usageStatsManager.queryAndAggregateUsageStats(startTime, endTime)
+
+        var totalDistractionMs = 0L
+        for ((packageName, stats) in aggregateStats) {
+            if (distractingPackages.contains(packageName)) {
+                totalDistractionMs += stats.totalTimeInForeground
+            }
+        }
+
+        return totalDistractionMs / 1000 / 60 // Return in minutes
     }
 
     // -------------------------------------------------------------------------

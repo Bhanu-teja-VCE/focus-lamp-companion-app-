@@ -56,6 +56,10 @@ class FocusViewModel(application: Application) : AndroidViewModel(application) {
     private val _isLimitExceeded = MutableLiveData(false)
     val isLimitExceeded: LiveData<Boolean> = _isLimitExceeded
 
+    // Distraction-only time (only apps the user marked as distracting)
+    private val _distractionOnlyMinutes = MutableLiveData(0L)
+    val distractionOnlyMinutes: LiveData<Long> = _distractionOnlyMinutes
+
     // === Monitoring State ===
     private val _isMonitoring = MutableLiveData(settingsManager.isMonitoringActive)
     val isMonitoring: LiveData<Boolean> = _isMonitoring
@@ -90,21 +94,36 @@ class FocusViewModel(application: Application) : AndroidViewModel(application) {
 
     fun refreshScreenTime() {
         viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
-            val minutes = screenTimeTracker.getTotalScreenTimeToday()
+            val totalMinutes = screenTimeTracker.getTotalScreenTimeToday()
+            val distractingApps = distractingAppsManager.getAll()
+            val distractionOnly = screenTimeTracker.getDistractionTimeOnly(distractingApps)
             kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
-                _distractionMinutes.value = minutes
-                _isLimitExceeded.value = minutes >= settingsManager.timeLimitMinutes
+                _distractionMinutes.value = totalMinutes
+                _distractionOnlyMinutes.value = distractionOnly
+                _isLimitExceeded.value = distractionOnly >= settingsManager.timeLimitMinutes
             }
         }
     }
 
     fun loadPerAppUsage() {
         viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
-            val apps = screenTimeTracker.getPerAppUsageToday()
+            val distractingApps = distractingAppsManager.getAll()
+            val apps = screenTimeTracker.getPerAppUsageToday(distractingApps)
             kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
                 _perAppUsage.value = apps
             }
         }
+    }
+
+    fun toggleDistractingApp(packageName: String, isDistracting: Boolean) {
+        if (isDistracting) {
+            distractingAppsManager.addApp(packageName)
+        } else {
+            distractingAppsManager.removeApp(packageName)
+        }
+        // Refresh both the per-app list and distraction time
+        refreshScreenTime()
+        loadPerAppUsage()
     }
 
     fun startMonitoringService() {

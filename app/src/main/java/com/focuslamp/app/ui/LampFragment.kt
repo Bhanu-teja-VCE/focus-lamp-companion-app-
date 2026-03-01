@@ -54,18 +54,20 @@ class LampFragment : Fragment(R.layout.fragment_lamp) {
             }
         }
 
-        // === Observe Screen Time and update lamp ===
-        viewModel.distractionMinutes.observe(viewLifecycleOwner) { minutes ->
+        // === Observe Distraction-Only Time and update lamp ===
+        viewModel.distractionOnlyMinutes.observe(viewLifecycleOwner) { distractionMins ->
             val limit = viewModel.timeLimitMinutes.value ?: 30
-            updateVirtualLamp(minutes, limit.toLong(), viewLampGlow, tvLampStatus)
-            tvLampDetail.text = "${minutes}m used of ${limit}m limit"
+            updateVirtualLamp(distractionMins, limit.toLong(), viewLampGlow, tvLampStatus)
+            val totalMins = viewModel.distractionMinutes.value ?: 0L
+            tvLampDetail.text = "Distraction: ${distractionMins}m · Total: ${totalMins}m · Limit: ${limit}m"
         }
 
         viewModel.timeLimitMinutes.observe(viewLifecycleOwner) { limit ->
             tvCurrentLimit.text = "Current limit: $limit min"
-            val currentScreenTime = viewModel.distractionMinutes.value ?: 0L
-            updateVirtualLamp(currentScreenTime, limit.toLong(), viewLampGlow, tvLampStatus)
-            tvLampDetail.text = "${currentScreenTime}m used of ${limit}m limit"
+            val distractionMins = viewModel.distractionOnlyMinutes.value ?: 0L
+            val totalMins = viewModel.distractionMinutes.value ?: 0L
+            updateVirtualLamp(distractionMins, limit.toLong(), viewLampGlow, tvLampStatus)
+            tvLampDetail.text = "Distraction: ${distractionMins}m · Total: ${totalMins}m · Limit: ${limit}m"
         }
 
         // Refresh data

@@ -6,6 +6,7 @@ import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
+import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -64,6 +65,15 @@ class StatsFragment : Fragment(R.layout.fragment_stats) {
                 return@observe
             }
 
+            // Hint text
+            val hint = TextView(requireContext()).apply {
+                text = "Toggle apps as distracting — the lamp tracks only these"
+                setTextColor(Color.parseColor("#64748B"))
+                textSize = 12f
+                setPadding(4, 0, 0, 16)
+            }
+            layoutAppUsageList.addView(hint)
+
             for (app in appList) {
                 val row = LinearLayout(requireContext()).apply {
                     orientation = LinearLayout.HORIZONTAL
@@ -72,7 +82,10 @@ class StatsFragment : Fragment(R.layout.fragment_stats) {
                     val bg = GradientDrawable().apply {
                         shape = GradientDrawable.RECTANGLE
                         cornerRadius = 16f
-                        setColor(Color.parseColor("#1E293B"))
+                        setColor(
+                            if (app.isDistracting) Color.parseColor("#2D1B1B")
+                            else Color.parseColor("#1E293B")
+                        )
                     }
                     background = bg
                     val params = LinearLayout.LayoutParams(
@@ -83,11 +96,27 @@ class StatsFragment : Fragment(R.layout.fragment_stats) {
                     layoutParams = params
                 }
 
+                // Distraction toggle checkbox
+                val checkbox = CheckBox(requireContext()).apply {
+                    isChecked = app.isDistracting
+                    val size = (24 * resources.displayMetrics.density).toInt()
+                    layoutParams = LinearLayout.LayoutParams(size, size).apply {
+                        marginEnd = (8 * resources.displayMetrics.density).toInt()
+                    }
+                    buttonTintList = android.content.res.ColorStateList.valueOf(
+                        if (app.isDistracting) Color.parseColor("#EF4444") else Color.parseColor("#64748B")
+                    )
+                    setOnCheckedChangeListener { _, isChecked ->
+                        viewModel.toggleDistractingApp(app.packageName, isChecked)
+                    }
+                }
+                row.addView(checkbox)
+
                 // App icon
                 val icon = ImageView(requireContext()).apply {
-                    val size = (40 * resources.displayMetrics.density).toInt()
+                    val size = (36 * resources.displayMetrics.density).toInt()
                     layoutParams = LinearLayout.LayoutParams(size, size).apply {
-                        marginEnd = (12 * resources.displayMetrics.density).toInt()
+                        marginEnd = (10 * resources.displayMetrics.density).toInt()
                     }
                     if (app.icon != null) {
                         setImageDrawable(app.icon)
@@ -97,23 +126,38 @@ class StatsFragment : Fragment(R.layout.fragment_stats) {
                 }
                 row.addView(icon)
 
-                // App name
-                val name = TextView(requireContext()).apply {
-                    text = app.appName
-                    setTextColor(Color.WHITE)
-                    textSize = 14f
+                // App name + distraction badge
+                val nameLayout = LinearLayout(requireContext()).apply {
+                    orientation = LinearLayout.VERTICAL
                     layoutParams = LinearLayout.LayoutParams(
                         0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f
                     )
                 }
-                row.addView(name)
+                val name = TextView(requireContext()).apply {
+                    text = app.appName
+                    setTextColor(Color.WHITE)
+                    textSize = 14f
+                }
+                nameLayout.addView(name)
+                if (app.isDistracting) {
+                    val badge = TextView(requireContext()).apply {
+                        text = "⚡ Distracting"
+                        setTextColor(Color.parseColor("#EF4444"))
+                        textSize = 11f
+                    }
+                    nameLayout.addView(badge)
+                }
+                row.addView(nameLayout)
 
                 // Usage time
                 val time = TextView(requireContext()).apply {
                     val h = app.usageMinutes / 60
                     val m = app.usageMinutes % 60
                     text = if (h > 0) "${h}h ${m}m" else "${m}m"
-                    setTextColor(Color.parseColor("#3B82F6"))
+                    setTextColor(
+                        if (app.isDistracting) Color.parseColor("#EF4444")
+                        else Color.parseColor("#3B82F6")
+                    )
                     textSize = 14f
                     setTypeface(typeface, Typeface.BOLD)
                 }
