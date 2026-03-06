@@ -49,6 +49,13 @@ class HttpLampController {
     }
 
     /**
+     * Ping the ESP32 /status endpoint to test connectivity.
+     */
+    suspend fun sendStatus(espIp: String): Boolean {
+        return sendGetRequest("http://$espIp/status")
+    }
+
+    /**
      * Generic HTTP GET to the ESP32.
      */
     private suspend fun sendGetRequest(url: String): Boolean = withContext(Dispatchers.IO) {
