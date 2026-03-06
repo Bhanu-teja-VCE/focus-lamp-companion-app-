@@ -62,8 +62,8 @@ class SessionRepository(
 
     suspend fun connectToLamp(): Resource<Boolean> {
         // Use HTTP GET /status to test connection (ESP32 serves HTTP, not raw TCP)
-        val success = httpController.sendStatus(currentIp)
-        return if (success) Resource.Success(true) else Resource.Error("Connection failed")
+        val result = httpController.sendStatus(currentIp)
+        return if (result.first) Resource.Success(true) else Resource.Error(result.second)
     }
 
     suspend fun startSession(durationMinutes: Int): Resource<Boolean> {

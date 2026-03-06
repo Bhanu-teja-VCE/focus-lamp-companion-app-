@@ -50,13 +50,30 @@ class HttpLampController {
 
     /**
      * Ping the ESP32 /status endpoint to test connectivity.
+     * Returns a Pair indicating success and an error message if any.
      */
-    suspend fun sendStatus(espIp: String): Boolean {
-        return sendGetRequest("http://$espIp/status")
+    suspend fun sendStatus(espIp: String): Pair<Boolean, String> = withContext(Dispatchers.IO) {
+        val url = "http://$espIp/status"
+        return@withContext try {
+            Log.d(TAG, "Sending GET → $url")
+            val request = Request.Builder()
+                .url(url)
+                .get()
+                .build()
+
+            val response = client.newCall(request).execute()
+            val success = response.isSuccessful
+            val msg = response.message
+            response.close()
+            if (success) Pair(true, "OK") else Pair(false, "HTTP ${response.code}: $msg")
+        } catch (e: Exception) {
+            Log.e(TAG, "HTTP request failed: ${e.message}")
+            Pair(false, e.message ?: "Unknown error")
+        }
     }
 
     /**
-     * Generic HTTP GET to the ESP32.
+     * Generic HTTP GET to the ESP32 (used by focus/distraction/idle).
      */
     private suspend fun sendGetRequest(url: String): Boolean = withContext(Dispatchers.IO) {
         return@withContext try {

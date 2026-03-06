@@ -259,7 +259,7 @@ class FocusViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             _connectionStatus.value = "Connecting..."
             val result = repository.connectToLamp()
-            _connectionStatus.value = if (result.data == true) "Connected" else "Connection Failed"
+            _connectionStatus.value = if (result.data == true) "Connected" else "Failed: ${result.message}"
         }
     }
 }
