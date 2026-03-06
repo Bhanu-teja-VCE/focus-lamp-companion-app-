@@ -158,6 +158,12 @@ class FocusViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    // Direct HTTP control wrappers for the UI
+    fun sendFocusCommand() { viewModelScope.launch { repository.sendFocus() } }
+    fun sendWarningCommand() { viewModelScope.launch { repository.sendWarning() } }
+    fun sendDistractionCommand() { viewModelScope.launch { repository.sendDistraction() } }
+    fun sendIdleCommand() { viewModelScope.launch { repository.sendIdle() } }
+
     fun stopSession() {
         timer?.cancel()
         _isSessionActive.value = false

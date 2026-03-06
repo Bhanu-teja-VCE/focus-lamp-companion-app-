@@ -42,6 +42,13 @@ class HttpLampController {
     }
 
     /**
+     * Send a warning signal to the lamp — makes it blink fast.
+     */
+    suspend fun sendWarning(espIp: String): Boolean {
+        return sendGetRequest("http://$espIp/warning")
+    }
+
+    /**
      * Tell the lamp to go idle — turns it OFF.
      */
     suspend fun sendIdle(espIp: String): Boolean {

@@ -74,6 +74,10 @@ class LampFragment : Fragment(R.layout.fragment_lamp) {
         viewModel.refreshScreenTime()
     }
 
+    // Track the current lamp mode to avoid spamming the ESP32
+    // 0 = Focus (Green), 1 = Warning (Orange), 2 = Distraction (Red)
+    private var currentMode = -1
+
     /**
      * Updates the Virtual Lamp glow color and status text.
      *  - GREEN:  screenTime < limit
@@ -87,22 +91,36 @@ class LampFragment : Fragment(R.layout.fragment_lamp) {
         val lampColor: Int
         val statusText: String
         val statusColor: Int
+        val newMode: Int
 
         when {
             screenTimeMinutes < limitMinutes -> {
                 lampColor = Color.parseColor("#22C55E")
                 statusText = "✅ Within Limit"
                 statusColor = Color.parseColor("#22C55E")
+                newMode = 0
             }
             screenTimeMinutes < limitMinutes + 15 -> {
                 lampColor = Color.parseColor("#F59E0B")
                 statusText = "⚠️ Approaching Limit"
                 statusColor = Color.parseColor("#F59E0B")
+                newMode = 1
             }
             else -> {
                 lampColor = Color.parseColor("#EF4444")
                 statusText = "🔴 Limit Exceeded!"
                 statusColor = Color.parseColor("#EF4444")
+                newMode = 2
+            }
+        }
+
+        // Send HTTP command to ESP32 ONLY when the mode actually changes
+        if (newMode != currentMode) {
+            currentMode = newMode
+            when (newMode) {
+                0 -> viewModel.sendFocusCommand()
+                1 -> viewModel.sendWarningCommand()
+                2 -> viewModel.sendDistractionCommand()
             }
         }
 

@@ -47,6 +47,17 @@ class SessionRepository(
         }
     }
 
+    /** Send warning signal via HTTP GET */
+    suspend fun sendWarning(): Resource<Boolean> {
+        return if (useHttp) {
+            val success = httpController.sendWarning(currentIp)
+            if (success) Resource.Success(true) else Resource.Error("HTTP warning failed")
+        } else {
+            val sent = socketManager.sendCommand("WARNING")
+            if (sent) Resource.Success(true) else Resource.Error("TCP warning failed")
+        }
+    }
+
     /** Send idle signal */
     suspend fun sendIdle(): Resource<Boolean> {
         return if (useHttp) {

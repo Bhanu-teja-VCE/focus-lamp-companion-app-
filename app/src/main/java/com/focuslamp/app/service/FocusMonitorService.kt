@@ -100,24 +100,39 @@ class FocusMonitorService : Service() {
         monitoringJob?.cancel()
         monitoringJob = serviceScope.launch {
             settingsManager.isMonitoringActive = true
+            var lastModeSent = -1 // 0=Focus, 1=Warning, 2=Distraction
 
             while (isActive) {
                 try {
-                    val distractionMinutes = screenTimeTracker.getTotalScreenTimeToday()
+                    // Only count apps the user has marked as distracting!
+                    val distractingLog = distractingAppsManager.getAll()
+                    val distractionMinutes = screenTimeTracker.getDistractionTimeOnly(distractingLog)
                     val limit = settingsManager.timeLimitMinutes
 
-                    Log.d(TAG, "Distraction: ${distractionMinutes}min / Limit: ${limit}min")
+                    Log.d(TAG, "DistractionOnly: ${distractionMinutes}min / Limit: ${limit}min")
 
                     val espIp = settingsManager.espIp
+                    val newMode: Int
 
-                    if (distractionMinutes >= limit) {
-                        // LIMIT EXCEEDED → Tell the lamp to go RED
-                        Log.w(TAG, "⚠️ Distraction limit exceeded! Sending alert to lamp.")
-                        httpLampController.sendDistraction(espIp)
+                    if (distractionMinutes < limit) {
+                        newMode = 0
+                    } else if (distractionMinutes < limit + 15) {
+                        newMode = 1
                     } else {
-                        // UNDER LIMIT → Tell the lamp to stay GREEN
-                        httpLampController.sendFocus(espIp)
+                        newMode = 2
                     }
+
+                    // Only send HTTP if the mode actually changed
+                    if (newMode != lastModeSent) {
+                        lastModeSent = newMode
+                        when (newMode) {
+                            0 -> httpLampController.sendFocus(espIp)
+                            1 -> httpLampController.sendWarning(espIp)
+                            2 -> httpLampController.sendDistraction(espIp)
+                        }
+                        Log.d(TAG, "Mode changed to $newMode. Sent command to ESP32.")
+                    }
+
                 } catch (e: Exception) {
                     Log.e(TAG, "Monitoring error: ${e.message}")
                 }
