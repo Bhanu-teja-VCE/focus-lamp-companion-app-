@@ -31,6 +31,7 @@
         android:roundIcon="@drawable/ic_lamp"
         android:supportsRtl="true"
         android:theme="@style/Theme.FocusLamp"
+        android:usesCleartextTraffic="true"
         tools:targetApi="34">
 
         <!-- Main Activity -->
