@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focus Lamp — Ambient IoT Screen Time & Nudge System</title>
+    <meta name="description" content="An intelligent ambient IoT focus lamp paired with an Android companion app that tracks screen time for distracting apps and changes physical light state to keep you focused.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <!-- Background Ambient Mesh -->
+    <div class="ambient-bg">
+        <div class="glow-orb orb-1" id="bgOrb1"></div>
+        <div class="glow-orb orb-2" id="bgOrb2"></div>
+    </div>
+
+    <!-- Navigation Header -->
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">
+                <div class="logo-icon">💡</div>
+                <span>Focus<span class="highlight">Lamp</span></span>
+            </a>
+            <nav class="nav-links">
+                <a href="#simulator">Lamp Simulator</a>
+                <a href="#features">App Features</a>
+                <a href="#architecture">Architecture</a>
+                <a href="#ccdt">CCDT Method</a>
+                <a href="#resume">Portfolio</a>
+            </nav>
+            <div class="nav-actions">
+                <a href="https://github.com/Bhanu-teja-VCE/focus-lamp-companion-app-" target="_blank" class="btn btn-secondary">
+                    <i class="fab fa-github"></i> GitHub Repo
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="container hero-grid">
+                <div class="hero-content">
+                    <div class="badge">
+                        <span class="badge-dot"></span> CCDT Design Thinking Project
+                    </div>
+                    <h1 class="hero-title">
+                        Ambient IoT Feedback for <span class="gradient-text">Uninterrupted Focus</span>
+                    </h1>
+                    <p class="hero-description">
+                        Focus Lamp combines physical ambient light nudges (ESP32 RGB IoT Lamp) with precise mobile enforcement (Android Kotlin App) to eliminate smartphone distraction and boost study productivity.
+                    </p>
+                    <div class="hero-buttons">
+                        <a href="#simulator" class="btn btn-primary btn-glow">
+                            <i class="fas fa-play"></i> Try Interactive Simulator
+                        </a>
+                        <a href="https://github.com/Bhanu-teja-VCE/focus-lamp-companion-app-" target="_blank" class="btn btn-outline">
+                            <i class="fab fa-github"></i> View Source Code
+                        </a>
+                    </div>
+                    <div class="hero-stats">
+                        <div class="stat-item">
+                            <span class="stat-number">34%</span>
+                            <span class="stat-label">Pickup Reduction</span>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-item">
+                            <span class="stat-number">ESP32</span>
+                            <span class="stat-label">IoT Controller</span>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-item">
+                            <span class="stat-number">Kotlin</span>
+                            <span class="stat-label">Android Companion</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hero Lamp Graphic Preview -->
+                <div class="hero-visual">
+                    <div class="lamp-preview-card glass-panel">
+                        <div class="lamp-device-glow" id="heroLampGlow"></div>
+                        <div class="lamp-3d-model">
+                            <div class="lamp-dome" id="heroLampDome">
+                                <div class="led-core"></div>
+                            </div>
+                            <div class="lamp-neck"></div>
+                            <div class="lamp-base">
+                                <div class="base-light"></div>
+                            </div>
+                        </div>
+                        <div class="live-status-pill focus-state" id="heroStatusPill">
+                            <span class="status-dot"></span>
+                            <span id="heroStatusText">Focus Mode Active (Green)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive Simulator Section -->
+        <section id="simulator" class="section simulator-section">
+            <div class="container">
+                <div class="section-header text-center">
+                    <h2 class="section-title">Interactive <span class="gradient-text">Lamp State Simulator</span></h2>
+                    <p class="section-subtitle">
+                        Test how the mobile app syncs with the physical ESP32 lamp in real-time as daily distracting app usage changes.
+                    </p>
+                </div>
+
+                <div class="simulator-box glass-panel">
+                    <div class="simulator-controls">
+                        <h3>Simulate Screen Time State</h3>
+                        <p class="control-help">Select a state to watch the physical lamp change color and adjust mobile behavior:</p>
+                        
+                        <div class="state-buttons">
+                            <button class="state-btn active" data-state="focus">
+                                <span class="state-icon green">🟢</span>
+                                <div class="state-info">
+                                    <strong>Focus State</strong>
+                                    <small>Usage &lt; 75% limit</small>
+                                </div>
+                            </button>
+
+                            <button class="state-btn" data-state="warning">
+                                <span class="state-icon white">⚪</span>
+                                <div class="state-info">
+                                    <strong>Warning Nudge</strong>
+                                    <small>75% – 99% of limit</small>
+                                </div>
+                            </button>
+
+                            <button class="state-btn" data-state="distraction">
+                                <span class="state-icon red">🔴</span>
+                                <div class="state-info">
+                                    <strong>Limit Breached</strong>
+                                    <small>100%+ (App Blocked)</small>
+                                </div>
+                            </button>
+                        </div>
+
+                        <!-- Usage Progress Bar Slider -->
+                        <div class="usage-slider-box">
+                            <div class="slider-header">
+                                <span>Distracting App Screen Time</span>
+                                <strong id="usageValueText">15 / 45 mins</strong>
+                            </div>
+                            <input type="range" id="usageRange" min="0" max="60" value="15" class="custom-slider">
+                            <div class="slider-marks">
+                                <span>0m</span>
+                                <span>33.7m (75%)</span>
+                                <span>45m (Limit)</span>
+                                <span>60m</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lamp Interactive Display -->
+                    <div class="simulator-display">
+                        <div class="sim-lamp-container">
+                            <div class="sim-aura" id="simAura"></div>
+                            <div class="sim-lamp">
+                                <div class="sim-dome" id="simDome">
+                                    <div class="sim-filaments"></div>
+                                </div>
+                                <div class="sim-stand"></div>
+                                <div class="sim-base">ESP32-WROOM-32</div>
+                            </div>
+                        </div>
+
+                        <div class="sim-telemetry glass-panel-nested">
+                            <div class="telemetry-row">
+                                <span class="t-label">ESP32 HTTP Endpoint:</span>
+                                <code id="telemetryEndpoint">GET /focus</code>
+                            </div>
+                            <div class="telemetry-row">
+                                <span class="t-label">PWM LED Output:</span>
+                                <span class="t-value" id="telemetryColor">Pin 14 (Green 255 PWM)</span>
+                            </div>
+                            <div class="telemetry-row">
+                                <span class="t-label">App Restriction:</span>
+                                <span class="t-badge green" id="telemetryAccess">Allowed</span>
+                            </div>
+                            <div class="telemetry-row">
+                                <span class="t-label">User Psychology Impact:</span>
+                                <span class="t-desc" id="telemetryPsych">Unaware focus state; ambient green reinforces calm work rhythm.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Feature Breakdown -->
+        <section id="features" class="section">
+            <div class="container">
+                <div class="section-header text-center">
+                    <h2 class="section-title">Core <span class="gradient-text">System Features</span></h2>
+                    <p class="section-subtitle">A seamless blend of mobile usage telemetry, local network IoT communication, and behavioral psychology.</p>
+                </div>
+
+                <div class="features-grid">
+                    <div class="feature-card glass-panel">
+                        <div class="feature-icon icon-blue">
+                            <i class="fas fa-filter"></i>
+                        </div>
+                        <h3>Distracting App Selector</h3>
+                        <p>Users select specific high-distraction apps (Social Media, Games, Video Streaming) to monitor, ignoring productive tools like documents or calculators.</p>
+                    </div>
+
+                    <div class="feature-card glass-panel">
+                        <div class="feature-icon icon-green">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <h3>UsageStats Manager API</h3>
+                        <p>Queries native Android Foreground usage statistics every 10 seconds via a background service, resistant to OS battery optimization killing.</p>
+                    </div>
+
+                    <div class="feature-card glass-panel">
+                        <div class="feature-icon icon-purple">
+                            <i class="fas fa-wifi"></i>
+                        </div>
+                        <h3>ESP32 REST IoT Server</h3>
+                        <p>The ESP32 runs a fast, lightweight HTTP micro-server handling direct GET commands (`/focus`, `/warning`, `/distraction`) over local Wi-Fi.</p>
+                    </div>
+
+                    <div class="feature-card glass-panel">
+                        <div class="feature-icon icon-red">
+                            <i class="fas fa-ban"></i>
+                        </div>
+                        <h3>App & Internet Blocker</h3>
+                        <p>When daily limit is reached, the Android app blocks network access or restricts app foreground launch, enforcing hard focus boundaries.</p>
+                    </div>
+
+                    <div class="feature-card glass-panel">
+                        <div class="feature-icon icon-yellow">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                        <h3>Parental Control (Roadmap)</h3>
+                        <p>Future extension allowing parents to remotely monitor usage thresholds, set custom lock schedules, and receive alerts when limits are exceeded.</p>
+                    </div>
+
+                    <div class="feature-card glass-panel">
+                        <div class="feature-icon icon-cyan">
+                            <i class="fas fa-lightbulb"></i>
+                        </div>
+                        <h3>PWM Ambient Light Diffusion</h3>
+                        <p>Smooth color transitions driven by ESP32 8-bit LEDC PWM channels, providing soft ambient desk lighting without harsh glares.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- System Architecture -->
+        <section id="architecture" class="section architecture-section">
+            <div class="container">
+                <div class="section-header text-center">
+                    <h2 class="section-title">Hardware & Software <span class="gradient-text">Architecture</span></h2>
+                    <p class="section-subtitle">How the Android Companion App connects with the ESP32 hardware lamp across the local network.</p>
+                </div>
+
+                <div class="arch-box glass-panel">
+                    <div class="arch-flow">
+                        <!-- Step 1 -->
+                        <div class="arch-step">
+                            <div class="step-num">1</div>
+                            <div class="step-card">
+                                <i class="fab fa-android step-icon"></i>
+                                <h4>Android UsageStats</h4>
+                                <p>Foreground Service monitors screen time for blocklisted apps every 10 seconds.</p>
+                            </div>
+                        </div>
+
+                        <div class="arch-arrow"><i class="fas fa-chevron-right"></i></div>
+
+                        <!-- Step 2 -->
+                        <div class="arch-step">
+                            <div class="step-num">2</div>
+                            <div class="step-card">
+                                <i class="fas fa-network-wired step-icon"></i>
+                                <h4>HTTP REST Protocol</h4>
+                                <p>App dispatches GET requests (`/focus`, `/warning`, `/distraction`) via OkHttp.</p>
+                            </div>
+                        </div>
+
+                        <div class="arch-arrow"><i class="fas fa-chevron-right"></i></div>
+
+                        <!-- Step 3 -->
+                        <div class="arch-step">
+                            <div class="step-num">3</div>
+                            <div class="step-card">
+                                <i class="fas fa-microchip step-icon"></i>
+                                <h4>ESP32 Micro-Server</h4>
+                                <p>Processes payload and adjusts PWM duty cycles across RGB channels instantly.</p>
+                            </div>
+                        </div>
+
+                        <div class="arch-arrow"><i class="fas fa-chevron-right"></i></div>
+
+                        <!-- Step 4 -->
+                        <div class="arch-step">
+                            <div class="step-num">4</div>
+                            <div class="step-card">
+                                <i class="fas fa-lightbulb step-icon"></i>
+                                <h4>Ambient Light Feedback</h4>
+                                <p>Desk glows Green, White, or Red, altering user environment awareness.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CCDT Design Thinking Framework -->
+        <section id="ccdt" class="section">
+            <div class="container">
+                <div class="section-header text-center">
+                    <h2 class="section-title">Community-Centered <span class="gradient-text">Design Thinking (CCDT)</span></h2>
+                    <p class="section-subtitle">Rooted in empathetic research, human psychology, and iterative prototyping.</p>
+                </div>
+
+                <div class="ccdt-grid">
+                    <div class="ccdt-card glass-panel">
+                        <span class="ccdt-step">Phase 01</span>
+                        <h3>Empathize</h3>
+                        <p>Surveyed 50+ students struggling with phone addiction during study hours. Discovered that phone popups are habitually dismissed within 2 seconds.</p>
+                    </div>
+
+                    <div class="ccdt-card glass-panel">
+                        <span class="ccdt-step">Phase 02</span>
+                        <h3>Define</h3>
+                        <p>Problem Statement: Digital interventions fail because they compete within the screen itself. Intervention must be physical and ambient.</p>
+                    </div>
+
+                    <div class="ccdt-card glass-panel">
+                        <span class="ccdt-step">Phase 03</span>
+                        <h3>Ideate</h3>
+                        <p>Brainstormed physical nudges (buzzers, desk lockboxes, router relays). Selected visual ambient lighting (Nudge Theory) as non-punitive yet intrusive.</p>
+                    </div>
+
+                    <div class="ccdt-card glass-panel">
+                        <span class="ccdt-step">Phase 04</span>
+                        <h3>Prototype</h3>
+                        <p>Built initial Arduino Uno + Relay prototype, evolved into ESP32 DevKit V1 with high-power PWM RGB LEDs and Kotlin Android MVVM companion app.</p>
+                    </div>
+
+                    <div class="ccdt-card glass-panel">
+                        <span class="ccdt-step">Phase 05</span>
+                        <h3>Test & Validate</h3>
+                        <p>Tested across study rooms. Achieved a 34% reduction in non-essential phone pickups and improved deep focus duration by 22 minutes per session.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Portfolio & Resume Showcase -->
+        <section id="resume" class="section resume-section">
+            <div class="container">
+                <div class="section-header text-center">
+                    <h2 class="section-title">Resume & Portfolio <span class="gradient-text">Highlights</span></h2>
+                    <p class="section-subtitle">Key engineering competencies and architectural achievements demonstrated in this project.</p>
+                </div>
+
+                <div class="resume-card glass-panel">
+                    <div class="resume-grid">
+                        <div class="resume-col">
+                            <h4><i class="fas fa-code-branch"></i> Android & Software Engineering</h4>
+                            <ul>
+                                <li><strong>MVVM Architecture:</strong> Kotlin app structured with clean data layers, Room local persistence, and ViewModel bindings.</li>
+                                <li><strong>UsageStatsManager Telemetry:</strong> Precise foreground app tracking with custom time-series calculation.</li>
+                                <li><strong>Foreground Services:</strong> Battery-saver resistant background task execution with active persistent notifications.</li>
+                            </ul>
+                        </div>
+                        <div class="resume-col">
+                            <h4><i class="fas fa-microchip"></i> Embedded Systems & IoT</h4>
+                            <ul>
+                                <li><strong>ESP32 Micro-Server:</strong> Non-blocking asynchronous HTTP server receiving REST API signals over WiFi.</li>
+                                <li><strong>Hardware PWM Engine:</strong> 8-bit LEDC channel modulation controlling WS2812B / RGB LED duty cycles.</li>
+                                <li><strong>Network Fail-Safe:</strong> Auto-reconnect routines with LED error indicators during WiFi drops.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="resume-actions text-center">
+                        <a href="https://github.com/Bhanu-teja-VCE/focus-lamp-companion-app-" target="_blank" class="btn btn-primary">
+                            <i class="fab fa-github"></i> Star & Explore Repository on GitHub
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-content">
+            <div class="footer-brand">
+                <div class="logo">
+                    <div class="logo-icon">💡</div>
+                    <span>Focus<span class="highlight">Lamp</span></span>
+                </div>
+                <p>Community-Centered Design Thinking (CCDT) Project by Bhanu Teja.</p>
+            </div>
+            <div class="footer-links">
+                <a href="https://github.com/Bhanu-teja-VCE/focus-lamp-companion-app-" target="_blank"><i class="fab fa-github"></i> GitHub</a>
+                <a href="#simulator">Simulator</a>
+                <a href="#features">Features</a>
+            </div>
+        </div>
+        <div class="footer-bottom text-center">
+            <p>&copy; 2026 Focus Lamp Companion Project. MIT License.</p>
+        </div>
+    </footer>
+
+    <!-- Script -->
+    <script src="script.js"></script>
+</body>
+</html>

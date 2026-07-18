@@ -1,147 +1,98 @@
-# 📱 How to Build the APK and Install on Your Phone
+# 📱 How to Build the APK and Install on Your Android Device
 
-This is a step-by-step guide to get the Focus Lamp app running on your Android phone using a USB data cable.
-
----
-
-## Prerequisites
-
-| What you need | Why |
-|---|---|
-| **Android Studio** | To build the app ([Download](https://developer.android.com/studio)) |
-| **USB Data Cable** | To connect your phone to PC |
-| **Android Phone** | Running Android 8.0 (Oreo) or above |
+> **Focus Lamp Companion App** — Developer Build & Installation Manual
 
 ---
 
-## Step 1: Open the Project in Android Studio
+## 📋 Prerequisites
 
-1. Open **Android Studio**
-2. Click **File → Open**
-3. Navigate to this folder:
+| Component | Minimum Requirement | Purpose |
+|---|---|---|
+| **Android Studio** | Hedgehog (2023.1.1) or newer | Compilation & Gradle dependency resolution |
+| **Android Device** | Android 8.0 (API 26 - Oreo) or higher | Testing `UsageStatsManager` & Foreground Service |
+| **USB Data Cable** | USB 2.0/3.0 Data Transfer Cable | Direct device debugging |
+| **Local Network** | Shared 2.4GHz Wi-Fi Network | ESP32 REST HTTP sync |
+
+---
+
+## 🛠 Step 1: Clone & Open in Android Studio
+
+1. Launch **Android Studio**.
+2. Select **File → Open**.
+3. Navigate to the project root directory:
+   ```bash
+   focus-lamp-companion-app-/
    ```
-   C:\Users\bhanu\Downloads\google anti gravity\focus lamp-the ultimate hardware project
+4. Allow **Gradle Sync** to finish downloading dependencies (`OkHttp3`, `Room DB`, `Lifecycle ViewModel`).
+
+> [!NOTE]
+> If prompted for missing Android SDK platforms, click **"Install Missing Components"** in the Android Studio notification bar.
+
+---
+
+## 🔓 Step 2: Enable Developer Options & USB Debugging
+
+1. On your Android phone, open **Settings → About Phone**.
+2. Tap **Build Number** 7 times until you see the notification: *"You are now a developer!"*
+3. Go back to **Settings → System → Developer Options**.
+4. Enable **USB Debugging**.
+
+---
+
+## 🔌 Step 3: Connect Device via USB
+
+1. Connect your device to your PC using the USB data cable.
+2. Accept the phone prompt: **"Allow USB Debugging from this computer?"** (check *"Always allow"*).
+3. Confirm your device appears in the top toolbar device selector in Android Studio.
+
+---
+
+## 🚀 Step 4: Build & Run App
+
+### Option A: Direct Debug Run
+1. Click the green **▶ Run** button in Android Studio.
+2. Select your connected device and click **OK**.
+3. The app will compile, install, and open automatically.
+
+### Option B: Build Standalone APK File
+1. In Android Studio, select **Build → Build Bundle(s) / APK(s) → Build APK(s)**.
+2. Upon build completion, click **"Locate"** to retrieve the generated APK file:
+   ```text
+   app/build/outputs/apk/debug/app-debug.apk
    ```
-4. Click **OK** and wait for **Gradle Sync** to finish (loading bars at the bottom — this can take 2-5 minutes on first load because it downloads dependencies like OkHttp)
-
-> ⚠️ If you see "SDK location not found", Android Studio will usually auto-fix this. Click "OK" on any prompts.
+3. Transfer `app-debug.apk` to your device via USB, Google Drive, or ADB.
 
 ---
 
-## Step 2: Enable Developer Mode on Your Phone
+## 🛡 Step 5: Grant Required Android Permissions
 
-1. Go to **Settings → About Phone**
-2. Tap **Build Number 7 times** rapidly
-3. You'll see: *"You are now a developer!"*
-4. Go back to **Settings → System → Developer Options**
-5. Turn ON **USB Debugging**
+The app requires two critical system permissions to function:
 
----
-
-## Step 3: Connect Phone via USB
-
-1. Plug your phone into your PC with the USB **data cable** (not a charging-only cable!)
-2. On your phone, a popup will appear: **"Allow USB debugging?"**
-3. Tap **Allow** (check "Always allow from this computer")
-4. In Android Studio, look at the top toolbar — your phone name should appear (e.g., "Samsung SM-A525F")
-
-> 💡 If it says "No Devices", try: different USB port, different cable, or restart Android Studio.
-
----
-
-## Step 4: Run the App (Method 1 — Direct Install)
-
-1. In Android Studio, click the green **▶ Run** button (top toolbar)
-2. Select your phone from the device list
-3. Click **OK**
-4. Wait 30-60 seconds while it builds and installs
-5. **The app will open automatically on your phone!** 🎉
-
----
-
-## Step 5: Build APK File (Method 2 — Shareable File)
-
-If you want a **standalone APK file** you can share with anyone:
-
-1. In Android Studio, go to **Build → Build Bundle(s) / APK(s) → Build APK(s)**
-2. Wait for the build to complete (bottom notification bar)
-3. When done, click **"Locate"** in the notification that says "APK(s) generated successfully"
-4. The file is at:
-   ```
-   focus lamp-the ultimate hardware project\app\build\outputs\apk\debug\app-debug.apk
-   ```
-
-### Transfer the APK to your phone:
-- **Option A:** Copy via USB (drag to phone's Downloads folder)
-- **Option B:** Upload to **Google Drive** → open on phone
-- **Option C:** Send via **WhatsApp Web**
-
-### Install the APK on phone:
-1. On your phone, tap the APK file
-2. If prompted: **"Allow installing unknown apps"** → Enable for Files/Drive
-3. Tap **Install**
-4. Done! The app is installed. 🚀
-
----
-
-## Step 6: Grant Permissions (IMPORTANT!)
-
-When you first open the app, it will ask for permissions:
-
-### 1. Usage Access (Required)
-- A dialog will appear → tap **"Open Settings"**
-- Find **Focus Lamp** in the list
-- Toggle it **ON**
-- Press **Back** to return to the app
+### 1. Usage Access Permission (Essential for Screen Time Telemetry)
+- Upon first launch, tap **"Grant Usage Access"**.
+- System Settings will open → Select **Focus Lamp** → Toggle **ON**.
+- Return to the app.
 
 ### 2. Notification Permission (Android 13+)
-- Tap **Allow** when prompted
-- This lets the monitoring service show its persistent notification
+- Tap **Allow** when prompted to ensure the Foreground Service persistent notification runs smoothly.
 
 ---
 
-## Step 7: Connect to Your ESP32
+## ⚙️ Step 6: Connect to ESP32 Focus Lamp
 
-1. Go to the **Settings** tab in the app (gear icon)
-2. Enter your ESP32's IP address (default: `192.168.4.1`)
-3. Tap **"Sync Lamp"** to test the connection
-4. Set your **Screen Time Limit** (e.g., 30 minutes)
-5. Tap **"Save Settings"**
-6. Go back to **Home** and tap **"Start Monitoring"**
-
-The app will now check your screen time every 10 seconds and signal the lamp! 💡
+1. Navigate to the **Settings Tab** (Gear Icon) inside the app.
+2. Input your ESP32's IP address (e.g., `192.168.1.120`).
+3. Tap **"Sync Lamp"** to trigger a test HTTP GET `/status` ping.
+4. Set your **Daily Screen Time Limit** for Distracting Apps (e.g., 30 minutes).
+5. Tap **"Start Monitoring"**.
 
 ---
 
-## Troubleshooting
+## 🔧 Troubleshooting Matrix
 
-| Problem | Fix |
-|---|---|
-| Gradle sync fails | Check internet connection, click "Try Again" |
-| "No Devices" in toolbar | Try different USB cable/port, re-enable USB debugging |
-| App crashes on open | Make sure you granted Usage Access permission |
-| Lamp not responding | Check ESP32 is powered on, verify IP address in Settings |
-| "Install blocked" on phone | Go to Settings → Security → Allow unknown sources |
-
----
-
-## Architecture Overview (For Judges)
-
-```
-📂 com.focuslamp.app
-├── 📂 data/
-│   ├── 📂 local/        → Room DB (session history)
-│   ├── 📂 network/      → OkHttp (HTTP) + TCP Socket
-│   └── 📂 tracking/     → UsageStatsManager + Blocked Apps
-├── 📂 service/          → Foreground Service (background monitor)
-├── 📂 ui/               → Fragments, ViewModel, Activities
-└── 📂 utils/            → Settings, Resource wrapper
-```
-
-**Key Technologies:**
-- **Kotlin** — Modern Android development language
-- **MVVM Architecture** — Clean separation of UI and logic
-- **UsageStatsManager** — Android's official screen time API
-- **OkHttp** — HTTP client for ESP32 communication
-- **Room Database** — Local persistence for session history
-- **Foreground Service** — Battery-saver-proof background monitoring
+| Problem | Cause | Solution |
+|---|---|---|
+| **Gradle Sync Failed** | Missing internet / offline mode | Toggle Offline Mode OFF in Gradle settings & re-sync |
+| **Lamp Not Changing Color** | Incorrect IP or Wi-Fi subnet | Ensure phone and ESP32 are connected to the exact same Wi-Fi router |
+| **Screen Time Not Updating** | Usage Access Permission revoked | Re-grant permission in `Settings → Security → Usage Access` |
+| **App Killed in Background** | OS Battery Optimization | Disable Battery Optimization for Focus Lamp in Phone Settings |

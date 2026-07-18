@@ -11,48 +11,55 @@ import java.util.concurrent.TimeUnit
  * Sends HTTP GET requests to the ESP32 lamp controller.
  *
  * Endpoints:
- *   GET http://<IP>/distraction  → Lamp turns RED (user is distracted)
- *   GET http://<IP>/focus        → Lamp turns GREEN (user is focused)
- *   GET http://<IP>/idle         → Lamp turns OFF (monitoring stopped)
+ *   GET http://<IP>/distraction  -> Lamp turns RED (limit exceeded)
+ *   GET http://<IP>/warning      -> Lamp turns WHITE (approaching limit)
+ *   GET http://<IP>/focus        -> Lamp turns GREEN (within limit)
+ *   GET http://<IP>/idle         -> Lamp turns GREEN (ready)
  */
 class HttpLampController {
 
     private val client = OkHttpClient.Builder()
-        .connectTimeout(5, TimeUnit.SECONDS)
-        .readTimeout(5, TimeUnit.SECONDS)
-        .writeTimeout(5, TimeUnit.SECONDS)
+        .connectTimeout(15, TimeUnit.SECONDS) // Increased for local network discovery
+        .readTimeout(15, TimeUnit.SECONDS)
+        .writeTimeout(15, TimeUnit.SECONDS)
         .build()
 
     companion object {
         private const val TAG = "HttpLampController"
     }
 
+    private fun formatUrl(espIp: String, path: String): String {
+        // Clean the IP address in case the user typed http:// manually
+        val cleanIp = espIp.replace("http://", "").replace("https://", "").trim()
+        return "http://$cleanIp/$path"
+    }
+
     /**
      * Send a distraction alert to the lamp — makes it turn RED.
      */
     suspend fun sendDistraction(espIp: String): Boolean {
-        return sendGetRequest("http://$espIp/distraction")
+        return sendGetRequest(formatUrl(espIp, "distraction"))
     }
 
     /**
      * Send a focus signal to the lamp — makes it turn GREEN.
      */
     suspend fun sendFocus(espIp: String): Boolean {
-        return sendGetRequest("http://$espIp/focus")
+        return sendGetRequest(formatUrl(espIp, "focus"))
     }
 
     /**
-     * Send a warning signal to the lamp — makes it blink fast.
+     * Send a warning signal to the lamp: makes it turn WHITE.
      */
     suspend fun sendWarning(espIp: String): Boolean {
-        return sendGetRequest("http://$espIp/warning")
+        return sendGetRequest(formatUrl(espIp, "warning"))
     }
 
     /**
-     * Tell the lamp to go idle — turns it OFF.
+     * Tell the lamp to go idle: makes it turn GREEN/ready.
      */
     suspend fun sendIdle(espIp: String): Boolean {
-        return sendGetRequest("http://$espIp/idle")
+        return sendGetRequest(formatUrl(espIp, "idle"))
     }
 
     /**
@@ -60,7 +67,7 @@ class HttpLampController {
      * Returns a Pair indicating success and an error message if any.
      */
     suspend fun sendStatus(espIp: String): Pair<Boolean, String> = withContext(Dispatchers.IO) {
-        val url = "http://$espIp/status"
+        val url = formatUrl(espIp, "status")
         return@withContext try {
             Log.d(TAG, "Sending GET → $url")
             val request = Request.Builder()

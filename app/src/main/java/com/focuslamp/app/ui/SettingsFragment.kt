@@ -1,6 +1,10 @@
 package com.focuslamp.app.ui
 
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -32,6 +36,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         val tvLimitValue = view.findViewById<TextView>(R.id.tvTimeLimitValue)
         val tvBlockedApps = view.findViewById<TextView>(R.id.tvBlockedAppsList)
         val btnSyncLamp = view.findViewById<Button>(R.id.btnSyncLamp)
+        val btnGrantOverlay = view.findViewById<Button>(R.id.btnGrantOverlay)
 
         // Load current values
         etIpAddress.setText(settingsManager.espIp)
@@ -54,6 +59,19 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
+
+        // Grant Overlay Permission
+        btnGrantOverlay.setOnClickListener {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(requireContext())) {
+                val intent = Intent(
+                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:${requireContext().packageName}")
+                )
+                startActivity(intent)
+            } else {
+                Toast.makeText(requireContext(), "Permission already granted!", Toast.LENGTH_SHORT).show()
+            }
+        }
 
         // Save button
         btnSave.setOnClickListener {

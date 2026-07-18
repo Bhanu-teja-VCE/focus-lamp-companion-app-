@@ -218,9 +218,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
     /**
      * Updates the Virtual Lamp glow color and status text.
-     *  - GREEN:  screenTime < limit
-     *  - ORANGE: limit <= screenTime < limit + 15 min
-     *  - RED:    screenTime >= limit + 15 min
+     *  - GREEN: screenTime < 80% of limit
+     *  - WHITE: screenTime is approaching the limit
+     *  - RED:   screenTime >= limit
      */
     private fun updateVirtualLamp(
         screenTimeMinutes: Long, limitMinutes: Long,
@@ -229,22 +229,23 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         val lampColor: Int
         val statusText: String
         val statusColor: Int
+        val warningThreshold = maxOf(1L, (limitMinutes * 80L + 99L) / 100L)
 
         when {
-            screenTimeMinutes < limitMinutes -> {
-                lampColor = Color.parseColor("#22C55E")
-                statusText = "✅ Within Limit"
-                statusColor = Color.parseColor("#22C55E")
-            }
-            screenTimeMinutes < limitMinutes + 15 -> {
-                lampColor = Color.parseColor("#F59E0B")
-                statusText = "⚠️ Approaching Limit"
-                statusColor = Color.parseColor("#F59E0B")
-            }
-            else -> {
+            screenTimeMinutes >= limitMinutes -> {
                 lampColor = Color.parseColor("#EF4444")
                 statusText = "🔴 Limit Exceeded!"
                 statusColor = Color.parseColor("#EF4444")
+            }
+            screenTimeMinutes >= warningThreshold -> {
+                lampColor = Color.parseColor("#F8FAFC")
+                statusText = "⚪ Approaching Limit"
+                statusColor = Color.parseColor("#F8FAFC")
+            }
+            else -> {
+                lampColor = Color.parseColor("#22C55E")
+                statusText = "✅ Within Limit"
+                statusColor = Color.parseColor("#22C55E")
             }
         }
 

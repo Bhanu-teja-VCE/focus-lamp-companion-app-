@@ -181,4 +181,32 @@ class ScreenTimeTracker(private val context: Context) {
             set(Calendar.MILLISECOND, 0)
         }.timeInMillis
     }
+
+    /**
+     * Determines the exact app package currently in the foreground by looking
+     * at the most recent ACTIVITY_RESUMED event in the last 5 minutes.
+     */
+    fun getCurrentForegroundApp(): String? {
+        if (!hasUsagePermission()) return null
+
+        val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as? UsageStatsManager
+            ?: return null
+
+        val endTime = System.currentTimeMillis()
+        val startTime = endTime - (1000 * 60 * 5) // Look back 5 minutes
+
+        val usageEvents = usageStatsManager.queryEvents(startTime, endTime)
+        val event = UsageEvents.Event()
+        var currentForegroundApp: String? = null
+
+        while (usageEvents.hasNextEvent()) {
+            usageEvents.getNextEvent(event)
+            // Event type 1 is ACTIVITY_RESUMED / MOVE_TO_FOREGROUND
+            if (event.eventType == 1) {
+                currentForegroundApp = event.packageName
+            }
+        }
+
+        return currentForegroundApp
+    }
 }

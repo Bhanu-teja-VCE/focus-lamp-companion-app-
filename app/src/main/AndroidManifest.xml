@@ -23,6 +23,9 @@
     <!-- Notifications: Required on Android 13+ to show foreground service notification -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <!-- System Alert Window: To draw the full-screen warning over distracting apps -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+
     <application
         android:name=".FocusLampApp"
         android:allowBackup="true"

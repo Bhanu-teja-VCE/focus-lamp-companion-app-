@@ -15,7 +15,7 @@ import com.focuslamp.app.utils.SettingsManager
 
 /**
  * Dedicated Lamp screen — the centerpiece of the Focus Lamp product.
- * Shows the virtual lamp status (Green/Orange/Red), waste time limit input,
+ * Shows the virtual lamp status (Green/White/Red), waste time limit input,
  * and per-app screen time breakdown.
  */
 class LampFragment : Fragment(R.layout.fragment_lamp) {
@@ -75,14 +75,14 @@ class LampFragment : Fragment(R.layout.fragment_lamp) {
     }
 
     // Track the current lamp mode to avoid spamming the ESP32
-    // 0 = Focus (Green), 1 = Warning (Orange), 2 = Distraction (Red)
+    // 0 = Focus (Green), 1 = Warning (White), 2 = Distraction (Red)
     private var currentMode = -1
 
     /**
      * Updates the Virtual Lamp glow color and status text.
-     *  - GREEN:  screenTime < limit
-     *  - ORANGE: limit <= screenTime < limit + 15 min
-     *  - RED:    screenTime >= limit + 15 min
+     *  - GREEN: screenTime < 80% of limit
+     *  - WHITE: screenTime is approaching the limit
+     *  - RED:   screenTime >= limit
      */
     private fun updateVirtualLamp(
         screenTimeMinutes: Long, limitMinutes: Long,
@@ -92,25 +92,26 @@ class LampFragment : Fragment(R.layout.fragment_lamp) {
         val statusText: String
         val statusColor: Int
         val newMode: Int
+        val warningThreshold = maxOf(1L, (limitMinutes * 80L + 99L) / 100L)
 
         when {
-            screenTimeMinutes < limitMinutes -> {
-                lampColor = Color.parseColor("#22C55E")
-                statusText = "✅ Within Limit"
-                statusColor = Color.parseColor("#22C55E")
-                newMode = 0
-            }
-            screenTimeMinutes < limitMinutes + 15 -> {
-                lampColor = Color.parseColor("#F59E0B")
-                statusText = "⚠️ Approaching Limit"
-                statusColor = Color.parseColor("#F59E0B")
-                newMode = 1
-            }
-            else -> {
+            screenTimeMinutes >= limitMinutes -> {
                 lampColor = Color.parseColor("#EF4444")
                 statusText = "🔴 Limit Exceeded!"
                 statusColor = Color.parseColor("#EF4444")
                 newMode = 2
+            }
+            screenTimeMinutes >= warningThreshold -> {
+                lampColor = Color.parseColor("#F8FAFC")
+                statusText = "⚪ Approaching Limit"
+                statusColor = Color.parseColor("#F8FAFC")
+                newMode = 1
+            }
+            else -> {
+                lampColor = Color.parseColor("#22C55E")
+                statusText = "✅ Within Limit"
+                statusColor = Color.parseColor("#22C55E")
+                newMode = 0
             }
         }
 
