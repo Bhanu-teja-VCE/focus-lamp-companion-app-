@@ -1,52 +1,72 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background_dark"
-    android:fillViewport="true">
+    android:background="@color/colorBackground"
+    android:fillViewport="true"
+    android:clipToPadding="false"
+    android:paddingBottom="80dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp">
+        android:paddingHorizontal="20dp"
+        android:paddingTop="16dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Settings"
-            android:textSize="28sp"
-            android:textColor="@color/text_white"
-            android:textStyle="bold"
-            android:layout_marginBottom="24dp" />
+            android:text="⚙️ App Settings & Hardware"
+            android:textColor="@color/text_navy"
+            android:textSize="24sp"
+            android:textStyle="bold" />
 
-        <!-- ===== ESP32 Connection ===== -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="Manage ESP32 network sync, distraction limits, and system permissions."
+            android:textColor="@color/text_secondary"
+            android:textSize="14sp" />
+
+        <!-- ===== SECTION 1: ESP32 Connection ===== -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="@drawable/bg_card_dark"
+            android:background="@drawable/bg_card_light"
             android:padding="20dp"
+            android:layout_marginTop="16dp"
             android:layout_marginBottom="16dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="ESP32 Connection"
+                android:text="Lamp Device Connection"
                 android:textSize="16sp"
-                android:textColor="@color/text_white"
+                android:textColor="@color/text_navy"
                 android:textStyle="bold"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Supports 2.4 GHz local WiFi networks & mDNS (focuslamp.local)"
+                android:textSize="12sp"
+                android:textColor="@color/text_secondary"
                 android:layout_marginBottom="12dp" />
 
             <EditText
                 android:id="@+id/etIpAddress"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:background="@drawable/bg_input_field"
-                android:hint="ESP32 IP Address"
+                android:background="@drawable/bg_input_light"
+                android:hint="ESP32 IP Address (e.g. 192.168.4.1)"
                 android:textColorHint="@color/text_muted"
-                android:textColor="@color/text_white"
+                android:textColor="@color/text_navy"
                 android:textSize="14sp"
                 android:paddingHorizontal="16dp"
                 android:inputType="text"
@@ -56,31 +76,33 @@
                 android:id="@+id/btnSyncLamp"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:background="@drawable/bg_button_primary"
-                android:text="Sync Lamp"
+                android:backgroundTint="@color/primary_blue"
+                android:text="Sync Lamp Connection"
                 android:textColor="@color/text_white"
+                android:textSize="14sp"
                 android:textAllCaps="false"
+                android:textStyle="bold"
                 android:stateListAnimator="@null" />
 
         </LinearLayout>
 
-        <!-- ===== Screen Time Limit ===== -->
+        <!-- ===== SECTION 2: Screen Time Limit ===== -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="@drawable/bg_card_dark"
+            android:background="@drawable/bg_card_light"
             android:padding="20dp"
             android:layout_marginBottom="16dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Screen Time Limit"
+                android:text="Daily Focus Limit Slider"
                 android:textSize="16sp"
-                android:textColor="@color/text_white"
+                android:textColor="@color/text_navy"
                 android:textStyle="bold"
-                android:layout_marginBottom="8dp" />
+                android:layout_marginBottom="4dp" />
 
             <TextView
                 android:id="@+id/tvTimeLimitValue"
@@ -88,8 +110,9 @@
                 android:layout_height="wrap_content"
                 android:text="30 minutes"
                 android:textSize="14sp"
-                android:textColor="@color/primary"
-                android:layout_marginBottom="8dp" />
+                android:textColor="@color/primary_green"
+                android:textStyle="bold"
+                android:layout_marginBottom="12dp" />
 
             <SeekBar
                 android:id="@+id/seekBarTimeLimit"
@@ -98,17 +121,17 @@
                 android:min="5"
                 android:max="120"
                 android:progress="30"
-                android:progressTint="@color/primary"
-                android:thumbTint="@color/primary" />
+                android:progressTint="@color/primary_green"
+                android:thumbTint="@color/primary_green" />
 
         </LinearLayout>
 
-        <!-- ===== Blocked Apps ===== -->
+        <!-- ===== SECTION 3: Blocked Apps ===== -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="@drawable/bg_card_dark"
+            android:background="@drawable/bg_card_light"
             android:padding="20dp"
             android:layout_marginBottom="16dp">
 
@@ -117,44 +140,44 @@
                 android:layout_height="wrap_content"
                 android:text="Tracked Distracting Apps"
                 android:textSize="16sp"
-                android:textColor="@color/text_white"
+                android:textColor="@color/text_navy"
                 android:textStyle="bold"
-                android:layout_marginBottom="12dp" />
+                android:layout_marginBottom="8dp" />
 
             <TextView
                 android:id="@+id/tvBlockedAppsList"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Loading..."
+                android:text="Loading blocklisted apps..."
                 android:textSize="14sp"
                 android:textColor="@color/text_secondary"
                 android:lineSpacingExtra="4dp" />
 
         </LinearLayout>
 
-        <!-- ===== Permissions ===== -->
+        <!-- ===== SECTION 4: Permissions ===== -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="@drawable/bg_card_dark"
+            android:background="@drawable/bg_card_light"
             android:padding="20dp"
             android:layout_marginBottom="16dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="System Permissions"
+                android:text="System Permissions Diagnostic"
                 android:textSize="16sp"
-                android:textColor="@color/text_white"
+                android:textColor="@color/text_navy"
                 android:textStyle="bold"
-                android:layout_marginBottom="12dp" />
+                android:layout_marginBottom="4dp" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Required to show the full-screen alert over distracting apps."
-                android:textSize="14sp"
+                android:text="Usage Access & Display Over Other Apps are required for automatic focus enforcement."
+                android:textSize="13sp"
                 android:textColor="@color/text_secondary"
                 android:layout_marginBottom="12dp" />
 
@@ -162,27 +185,29 @@
                 android:id="@+id/btnGrantOverlay"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:background="@drawable/bg_button_primary"
-                android:backgroundTint="#EF4444"
+                android:backgroundTint="@color/danger_red"
                 android:text="Grant Overlay Permission"
                 android:textColor="@color/text_white"
+                android:textSize="14sp"
                 android:textAllCaps="false"
+                android:textStyle="bold"
                 android:stateListAnimator="@null" />
 
         </LinearLayout>
 
-        <!-- ===== Save Button ===== -->
+        <!-- Save Button -->
         <Button
             android:id="@+id/btnSaveSettings"
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:background="@drawable/bg_button_primary"
-            android:backgroundTint="@color/accent_green"
+            android:backgroundTint="@color/primary_green"
             android:text="Save Settings"
             android:textColor="@color/text_white"
             android:textSize="16sp"
             android:textAllCaps="false"
-            android:stateListAnimator="@null" />
+            android:textStyle="bold"
+            android:stateListAnimator="@null"
+            android:layout_marginBottom="24dp" />
 
     </LinearLayout>
 

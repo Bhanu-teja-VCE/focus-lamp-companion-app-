@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background_dark"
+    android:background="@color/colorBackground"
     android:fillViewport="true"
     android:clipToPadding="false"
     android:paddingBottom="80dp">
@@ -13,31 +14,45 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:paddingHorizontal="20dp"
-        android:paddingTop="8dp">
+        android:paddingTop="16dp">
 
-        <!-- ========================================= -->
-        <!--  SECTION 1: Virtual Lamp Status           -->
-        <!-- ========================================= -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="💡 Device Control & Virtual Lamp"
+            android:textColor="@color/text_navy"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="Real-time ESP32 hardware synchronization and color preview."
+            android:textColor="@color/text_secondary"
+            android:textSize="14sp" />
+
+        <!-- Large Lamp Glow Card -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="@drawable/bg_card_dark"
-            android:padding="24dp"
+            android:background="@drawable/bg_card_light"
+            android:padding="28dp"
             android:gravity="center"
+            android:layout_marginTop="16dp"
             android:layout_marginBottom="16dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="FOCUS LAMP"
+                android:text="PHYSICAL LAMP STATE"
                 android:textSize="11sp"
                 android:textColor="@color/text_secondary"
                 android:letterSpacing="0.15"
                 android:textStyle="bold"
                 android:layout_marginBottom="16dp" />
 
-            <!-- Large Lamp Glow Circle -->
             <FrameLayout
                 android:layout_width="120dp"
                 android:layout_height="120dp"
@@ -47,7 +62,7 @@
                     android:id="@+id/viewLampGlow"
                     android:layout_width="120dp"
                     android:layout_height="120dp"
-                    android:background="@drawable/bg_progress_track" />
+                    android:background="@drawable/bg_chip_soft_green" />
 
                 <TextView
                     android:id="@+id/tvLampIcon"
@@ -64,8 +79,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Within Limit"
-                android:textSize="18sp"
-                android:textColor="@color/accent_green"
+                android:textSize="20sp"
+                android:textColor="@color/primary_green"
                 android:textStyle="bold"
                 android:layout_marginBottom="6dp" />
 
@@ -74,19 +89,17 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="0m used of 30m limit"
-                android:textSize="13sp"
+                android:textSize="14sp"
                 android:textColor="@color/text_secondary" />
 
         </LinearLayout>
 
-        <!-- ========================================= -->
-        <!--  SECTION 2: Set Waste Time Limit          -->
-        <!-- ========================================= -->
+        <!-- Set Waste Time Limit Card -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="@drawable/bg_card_dark"
+            android:background="@drawable/bg_card_light"
             android:padding="20dp"
             android:layout_marginBottom="16dp">
 
@@ -95,14 +108,14 @@
                 android:layout_height="wrap_content"
                 android:text="Set Your Screen Time Limit"
                 android:textSize="15sp"
-                android:textColor="@color/text_white"
+                android:textColor="@color/text_navy"
                 android:textStyle="bold"
                 android:layout_marginBottom="4dp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Enter the max time (minutes) you want to waste"
+                android:text="Enter max distraction time (minutes) before alert triggers"
                 android:textSize="12sp"
                 android:textColor="@color/text_secondary"
                 android:layout_marginBottom="12dp" />
@@ -118,10 +131,10 @@
                     android:layout_width="0dp"
                     android:layout_height="48dp"
                     android:layout_weight="1"
-                    android:background="@drawable/bg_input_field"
-                    android:hint="e.g. 135"
+                    android:background="@drawable/bg_input_light"
+                    android:hint="e.g. 30"
                     android:textColorHint="@color/text_muted"
-                    android:textColor="@color/text_white"
+                    android:textColor="@color/text_navy"
                     android:textSize="16sp"
                     android:paddingHorizontal="16dp"
                     android:inputType="number"
@@ -131,13 +144,13 @@
                     android:id="@+id/btnSetLimit"
                     android:layout_width="wrap_content"
                     android:layout_height="48dp"
-                    android:background="@drawable/bg_button_primary"
-                    android:text="Set"
+                    android:backgroundTint="@color/primary_green"
+                    android:text="Set Limit"
                     android:textColor="@color/text_white"
                     android:textSize="14sp"
                     android:textAllCaps="false"
                     android:textStyle="bold"
-                    android:paddingHorizontal="24dp"
+                    android:paddingHorizontal="20dp"
                     android:stateListAnimator="@null" />
 
             </LinearLayout>
@@ -148,7 +161,7 @@
                 android:layout_height="wrap_content"
                 android:text="Current limit: 30 min"
                 android:textSize="12sp"
-                android:textColor="@color/text_muted"
+                android:textColor="@color/text_secondary"
                 android:layout_marginTop="8dp" />
 
         </LinearLayout>

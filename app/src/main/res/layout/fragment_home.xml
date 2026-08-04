@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background_dark"
+    android:background="@color/colorBackground"
     android:fillViewport="true"
     android:clipToPadding="false"
     android:paddingBottom="80dp">
@@ -13,7 +14,25 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:paddingHorizontal="20dp"
-        android:paddingTop="8dp">
+        android:paddingTop="16dp">
+
+        <!-- Greeting Header -->
+        <TextView
+            android:id="@+id/tvGreeting"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Welcome Back 👋"
+            android:textColor="@color/text_navy"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="Here is your digital wellbeing & focus dashboard for today."
+            android:textColor="@color/text_secondary"
+            android:textSize="14sp" />
 
         <!-- ========================================= -->
         <!--  SECTION 1: Focus Ring (Circular Progress) -->
@@ -23,9 +42,8 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center"
-            android:paddingVertical="20dp">
+            android:paddingVertical="16dp">
 
-            <!-- Dual Rings Container -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -52,7 +70,6 @@
                         android:progressDrawable="@drawable/circular_progress"
                         android:rotation="-90" />
 
-                    <!-- Inner Text -->
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -76,7 +93,7 @@
                             android:layout_height="wrap_content"
                             android:text="0h 0m"
                             android:textSize="22sp"
-                            android:textColor="@color/text_white"
+                            android:textColor="@color/text_navy"
                             android:textStyle="bold" />
 
                     </LinearLayout>
@@ -101,7 +118,6 @@
                         android:progressDrawable="@drawable/circular_progress_red"
                         android:rotation="-90" />
 
-                    <!-- Inner Text -->
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -125,7 +141,7 @@
                             android:layout_height="wrap_content"
                             android:text="0h 0m"
                             android:textSize="22sp"
-                            android:textColor="@color/text_white"
+                            android:textColor="@color/text_navy"
                             android:textStyle="bold" />
 
                     </LinearLayout>
@@ -151,11 +167,10 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="vertical"
-                android:background="@drawable/bg_card_dark"
+                android:background="@drawable/bg_card_light"
                 android:padding="16dp"
                 android:layout_marginEnd="6dp">
 
-                <!-- Icon + Label Row -->
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -168,7 +183,7 @@
                         android:layout_height="wrap_content"
                         android:text="✓"
                         android:textSize="14sp"
-                        android:textColor="@color/primary"
+                        android:textColor="@color/primary_green"
                         android:layout_marginEnd="6dp" />
 
                     <TextView
@@ -188,7 +203,7 @@
                     android:layout_height="wrap_content"
                     android:text="0h 0m"
                     android:textSize="22sp"
-                    android:textColor="@color/text_white"
+                    android:textColor="@color/text_navy"
                     android:textStyle="bold"
                     android:layout_marginBottom="2dp" />
 
@@ -198,10 +213,9 @@
                     android:layout_height="wrap_content"
                     android:text="Focus Time"
                     android:textSize="12sp"
-                    android:textColor="@color/accent_green"
+                    android:textColor="@color/primary_green"
                     android:layout_marginBottom="12dp" />
 
-                <!-- Blue Progress Bar -->
                 <ProgressBar
                     android:id="@+id/progressProductive"
                     style="@android:style/Widget.ProgressBar.Horizontal"
@@ -219,11 +233,10 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="vertical"
-                android:background="@drawable/bg_card_dark"
+                android:background="@drawable/bg_card_light"
                 android:padding="16dp"
                 android:layout_marginStart="6dp">
 
-                <!-- Icon + Label Row -->
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -236,7 +249,7 @@
                         android:layout_height="wrap_content"
                         android:text="⚠"
                         android:textSize="14sp"
-                        android:textColor="@color/accent_red"
+                        android:textColor="@color/danger_red"
                         android:layout_marginEnd="6dp" />
 
                     <TextView
@@ -256,7 +269,7 @@
                     android:layout_height="wrap_content"
                     android:text="0 min"
                     android:textSize="22sp"
-                    android:textColor="@color/text_white"
+                    android:textColor="@color/text_navy"
                     android:textStyle="bold"
                     android:layout_marginBottom="2dp" />
 
@@ -266,10 +279,9 @@
                     android:layout_height="wrap_content"
                     android:text="/ 30 min limit"
                     android:textSize="12sp"
-                    android:textColor="@color/accent_red"
+                    android:textColor="@color/danger_red"
                     android:layout_marginBottom="12dp" />
 
-                <!-- Red Progress Bar -->
                 <ProgressBar
                     android:id="@+id/progressDistraction"
                     style="@android:style/Widget.ProgressBar.Horizontal"
@@ -290,7 +302,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="@drawable/bg_card_dark"
+            android:background="@drawable/bg_card_light"
             android:padding="20dp"
             android:layout_marginBottom="16dp">
 
@@ -305,9 +317,9 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Daily Goal"
+                    android:text="Daily Goal Progress"
                     android:textSize="15sp"
-                    android:textColor="@color/text_white"
+                    android:textColor="@color/text_navy"
                     android:textStyle="bold" />
 
                 <TextView
@@ -316,7 +328,7 @@
                     android:layout_height="wrap_content"
                     android:text="0%"
                     android:textSize="14sp"
-                    android:textColor="@color/primary"
+                    android:textColor="@color/primary_blue"
                     android:textStyle="bold" />
 
             </LinearLayout>
@@ -347,9 +359,9 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Hardware Sync"
+            android:text="Hardware Device Sync"
             android:textSize="17sp"
-            android:textColor="@color/text_white"
+            android:textColor="@color/text_navy"
             android:textStyle="bold"
             android:layout_marginBottom="12dp"
             android:paddingStart="4dp" />
@@ -358,19 +370,17 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="@drawable/bg_card_dark"
+            android:background="@drawable/bg_card_light"
             android:padding="20dp"
             android:layout_marginBottom="16dp">
 
-            <!-- Device Row -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:layout_marginBottom="20dp">
+                android:layout_marginBottom="16dp">
 
-                <!-- Lamp Icon Circle -->
                 <FrameLayout
                     android:layout_width="48dp"
                     android:layout_height="48dp"
@@ -379,13 +389,14 @@
                     <View
                         android:layout_width="48dp"
                         android:layout_height="48dp"
-                        android:background="@drawable/bg_progress_track" />
+                        android:background="@drawable/bg_chip_soft_blue" />
 
                     <ImageView
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:src="@drawable/ic_lamp"
-                        android:layout_gravity="center" />
+                        android:layout_gravity="center"
+                        app:tint="@color/primary_blue" />
 
                 </FrameLayout>
 
@@ -398,9 +409,9 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Focus Lamp"
+                        android:text="ESP32 Focus Lamp"
                         android:textSize="15sp"
-                        android:textColor="@color/text_white"
+                        android:textColor="@color/text_navy"
                         android:textStyle="bold" />
 
                     <TextView
@@ -422,35 +433,33 @@
                     android:textColor="@color/text_secondary"
                     android:textStyle="bold"
                     android:letterSpacing="0.1"
-                    android:background="@drawable/bg_progress_track"
+                    android:background="@drawable/bg_chip_soft_blue"
                     android:paddingHorizontal="12dp"
                     android:paddingVertical="4dp" />
 
             </LinearLayout>
 
-            <!-- IP Input -->
             <EditText
                 android:id="@+id/etIpAddress"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:background="@drawable/bg_input_field"
+                android:background="@drawable/bg_input_light"
                 android:hint="Lamp IP Address (e.g. 192.168.4.1)"
                 android:textColorHint="@color/text_muted"
-                android:textColor="@color/text_white"
+                android:textColor="@color/text_navy"
                 android:textSize="14sp"
                 android:paddingHorizontal="16dp"
                 android:inputType="text"
                 android:layout_marginBottom="12dp"
                 android:drawableStart="@drawable/ic_settings"
                 android:drawablePadding="8dp"
-                android:drawableTint="@color/text_muted" />
+                android:drawableTint="@color/text_secondary" />
 
-            <!-- Connect Button -->
             <Button
                 android:id="@+id/btnSyncLamp"
                 android:layout_width="match_parent"
                 android:layout_height="52dp"
-                android:background="@drawable/bg_button_primary"
+                android:backgroundTint="@color/primary_blue"
                 android:text="⚡ Connect Focus Lamp"
                 android:textColor="@color/text_white"
                 android:textSize="15sp"
@@ -468,7 +477,7 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:background="@drawable/bg_card_dark"
+            android:background="@drawable/bg_card_light"
             android:padding="20dp"
             android:layout_marginBottom="16dp">
 
@@ -485,7 +494,7 @@
                     android:layout_height="wrap_content"
                     android:text="Live Monitoring"
                     android:textSize="15sp"
-                    android:textColor="@color/text_white"
+                    android:textColor="@color/text_navy"
                     android:textStyle="bold" />
 
                 <TextView
@@ -502,11 +511,11 @@
             <Button
                 android:id="@+id/btnToggleMonitoring"
                 android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:background="@drawable/bg_button_primary"
+                android:layout_height="44dp"
+                android:backgroundTint="@color/primary_green"
                 android:text="Start"
                 android:textColor="@color/text_white"
-                android:textSize="13sp"
+                android:textSize="14sp"
                 android:textAllCaps="false"
                 android:textStyle="bold"
                 android:paddingHorizontal="24dp"
@@ -521,7 +530,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="@drawable/bg_card_dark"
+            android:background="@drawable/bg_card_light"
             android:padding="20dp"
             android:gravity="center"
             android:layout_marginBottom="16dp">
@@ -529,14 +538,13 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="VIRTUAL LAMP"
+                android:text="VIRTUAL LAMP STATUS"
                 android:textSize="10sp"
                 android:textColor="@color/text_secondary"
                 android:letterSpacing="0.15"
                 android:textStyle="bold"
                 android:layout_marginBottom="12dp" />
 
-            <!-- Lamp Icon Circle -->
             <FrameLayout
                 android:layout_width="80dp"
                 android:layout_height="80dp"
@@ -546,7 +554,7 @@
                     android:id="@+id/viewLampGlow"
                     android:layout_width="80dp"
                     android:layout_height="80dp"
-                    android:background="@drawable/bg_progress_track" />
+                    android:background="@drawable/bg_chip_soft_green" />
 
                 <TextView
                     android:id="@+id/tvLampIcon"
@@ -563,8 +571,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Within Limit"
-                android:textSize="14sp"
-                android:textColor="@color/accent_green"
+                android:textSize="15sp"
+                android:textColor="@color/primary_green"
                 android:textStyle="bold" />
 
         </LinearLayout>
@@ -576,23 +584,23 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="@drawable/bg_card_dark"
+            android:background="@drawable/bg_card_light"
             android:padding="20dp"
             android:layout_marginBottom="16dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Set Your Screen Time Limit"
+                android:text="Daily Screen Time Limit"
                 android:textSize="15sp"
-                android:textColor="@color/text_white"
+                android:textColor="@color/text_navy"
                 android:textStyle="bold"
                 android:layout_marginBottom="4dp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Enter the max time (minutes) you want to waste"
+                android:text="Set max distraction time in minutes before lamp turns Red"
                 android:textSize="12sp"
                 android:textColor="@color/text_secondary"
                 android:layout_marginBottom="12dp" />
@@ -608,10 +616,10 @@
                     android:layout_width="0dp"
                     android:layout_height="48dp"
                     android:layout_weight="1"
-                    android:background="@drawable/bg_input_field"
-                    android:hint="e.g. 135"
+                    android:background="@drawable/bg_input_light"
+                    android:hint="e.g. 30"
                     android:textColorHint="@color/text_muted"
-                    android:textColor="@color/text_white"
+                    android:textColor="@color/text_navy"
                     android:textSize="16sp"
                     android:paddingHorizontal="16dp"
                     android:inputType="number"
@@ -621,13 +629,13 @@
                     android:id="@+id/btnSetLimit"
                     android:layout_width="wrap_content"
                     android:layout_height="48dp"
-                    android:background="@drawable/bg_button_primary"
-                    android:text="Set"
+                    android:backgroundTint="@color/primary_green"
+                    android:text="Set Limit"
                     android:textColor="@color/text_white"
                     android:textSize="14sp"
                     android:textAllCaps="false"
                     android:textStyle="bold"
-                    android:paddingHorizontal="24dp"
+                    android:paddingHorizontal="20dp"
                     android:stateListAnimator="@null" />
 
             </LinearLayout>
@@ -638,35 +646,31 @@
                 android:layout_height="wrap_content"
                 android:text="Current limit: 30 min"
                 android:textSize="12sp"
-                android:textColor="@color/text_muted"
+                android:textColor="@color/text_secondary"
                 android:layout_marginTop="8dp" />
 
         </LinearLayout>
 
-        <!-- ========================================= -->
-        <!--  SECTION 6c: Focus Timer Quick Access     -->
-        <!-- ========================================= -->
+        <!-- Start Focus Button -->
         <Button
             android:id="@+id/btnStartFocus"
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:background="@drawable/bg_card_dark"
-            android:text="🎯  Start Focus Timer"
+            android:backgroundTint="@color/primary_blue"
+            android:text="🎯  Start Focus Session"
             android:textColor="@color/text_white"
-            android:textSize="15sp"
+            android:textSize="16sp"
             android:textAllCaps="false"
             android:textStyle="bold"
             android:stateListAnimator="@null"
             android:layout_marginBottom="16dp" />
 
-        <!-- ========================================= -->
-        <!--  SECTION 7: Sessions Count                -->
-        <!-- ========================================= -->
+        <!-- Sessions Count Footer -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:background="@drawable/bg_card_dark"
+            android:background="@drawable/bg_card_light"
             android:padding="20dp"
             android:gravity="center"
             android:layout_marginBottom="24dp">
@@ -681,8 +685,8 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Sessions"
-                    android:textSize="11sp"
+                    android:text="SESSIONS COMPLETED"
+                    android:textSize="10sp"
                     android:textColor="@color/text_secondary"
                     android:letterSpacing="0.05" />
 
@@ -692,7 +696,7 @@
                     android:layout_height="wrap_content"
                     android:text="0"
                     android:textSize="24sp"
-                    android:textColor="@color/primary"
+                    android:textColor="@color/primary_green"
                     android:textStyle="bold" />
 
             </LinearLayout>
@@ -700,7 +704,7 @@
             <View
                 android:layout_width="1dp"
                 android:layout_height="40dp"
-                android:background="@color/surface_border" />
+                android:background="@color/divider" />
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -712,8 +716,8 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="ESP32"
-                    android:textSize="11sp"
+                    android:text="ESP32 DEVICE IP"
+                    android:textSize="10sp"
                     android:textColor="@color/text_secondary"
                     android:letterSpacing="0.05" />
 
@@ -723,7 +727,7 @@
                     android:layout_height="wrap_content"
                     android:text="192.168.4.1"
                     android:textSize="14sp"
-                    android:textColor="@color/primary"
+                    android:textColor="@color/primary_blue"
                     android:textStyle="bold" />
 
             </LinearLayout>

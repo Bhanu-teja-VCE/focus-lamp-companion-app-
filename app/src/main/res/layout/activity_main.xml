@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background_dark">
+    android:background="@color/colorBackground">
 
     <!-- ===== Top Header Bar ===== -->
     <LinearLayout
@@ -16,7 +16,7 @@
         android:paddingHorizontal="20dp"
         android:paddingTop="16dp"
         android:paddingBottom="12dp"
-        android:background="@color/background_dark"
+        android:background="@color/colorBackground"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
@@ -25,7 +25,7 @@
         <FrameLayout
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:background="@drawable/bg_button_primary"
+            android:background="@drawable/bg_chip_soft_green"
             android:layout_marginEnd="12dp">
 
             <ImageView
@@ -33,7 +33,7 @@
                 android:layout_height="24dp"
                 android:src="@drawable/ic_lamp"
                 android:layout_gravity="center"
-                android:tint="@color/text_white" />
+                app:tint="@color/primary_green" />
 
         </FrameLayout>
 
@@ -44,7 +44,7 @@
             android:layout_weight="1"
             android:text="Focus Lamp"
             android:textSize="20sp"
-            android:textColor="@color/text_white"
+            android:textColor="@color/text_navy"
             android:textStyle="bold"
             android:letterSpacing="-0.02" />
 
@@ -53,14 +53,14 @@
             android:id="@+id/btnHeaderSettings"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:background="@drawable/bg_progress_track">
+            android:background="@drawable/bg_chip_soft_blue">
 
             <ImageView
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@drawable/ic_settings"
                 android:layout_gravity="center"
-                android:tint="@color/text_secondary" />
+                app:tint="@color/primary_blue" />
 
         </FrameLayout>
 
@@ -84,11 +84,12 @@
         android:id="@+id/bottomNavigation"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@color/background_dark"
+        android:background="@color/colorSurface"
         android:paddingTop="4dp"
         android:paddingBottom="8dp"
-        app:itemIconTint="@color/primary"
-        app:itemTextColor="@color/text_secondary"
+        app:elevation="8dp"
+        app:itemIconTint="@color/primary_green"
+        app:itemTextColor="@color/text_navy"
         app:itemActiveIndicatorStyle="@null"
         app:labelVisibilityMode="labeled"
         app:menu="@menu/bottom_nav_menu"

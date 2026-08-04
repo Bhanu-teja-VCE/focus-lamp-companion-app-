@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorBackground"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="🤖 AI Personal Focus Coach"
+        android:textColor="@color/text_navy"
+        android:textSize="24sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:text="Ask questions, request session plans, or parse natural language rules."
+        android:textColor="@color/text_secondary"
+        android:textSize="13sp" />
+
+    <!-- Chat Output Box -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        android:layout_weight="1"
+        android:background="@drawable/bg_card_light"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/tvChatLog"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:lineSpacingExtra="6dp"
+                android:text="AI Coach: Hello! How can I help optimize your focus today?"
+                android:textColor="@color/text_navy"
+                android:textSize="15sp" />
+        </ScrollView>
+    </LinearLayout>
+
+    <!-- Prompt Bar -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/etUserPrompt"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_input_light"
+            android:hint="Ask your AI Focus Coach..."
+            android:paddingHorizontal="16dp"
+            android:textColor="@color/text_navy"
+            android:textColorHint="@color/text_muted"
+            android:textSize="14sp" />
+
+        <Button
+            android:id="@+id/btnSendPrompt"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_marginStart="8dp"
+            android:backgroundTint="@color/primary_blue"
+            android:text="Send"
+            android:textColor="@color/text_white"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textAllCaps="false"
+            android:stateListAnimator="@null" />
+    </LinearLayout>
+
+</LinearLayout>

@@ -10,6 +10,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.focuslamp.app.data.local.AppDatabase
 import com.focuslamp.app.data.local.SessionEntity
+import com.focuslamp.app.data.model.LampState
 import com.focuslamp.app.data.network.HttpLampController
 import com.focuslamp.app.data.network.SocketManager
 import com.focuslamp.app.data.repository.SessionRepository
@@ -31,6 +32,7 @@ class FocusViewModel(application: Application) : AndroidViewModel(application) {
     private val distractingAppsManager = DistractingAppsManager(application)
     private val sessionDao = AppDatabase.getInstance(application).sessionDao()
     private val repository = SessionRepository(SocketManager(), HttpLampController())
+    private val httpController = HttpLampController()
 
     // === Timer State ===
     private val _timerText = MutableLiveData("25:00")
@@ -88,6 +90,15 @@ class FocusViewModel(application: Application) : AndroidViewModel(application) {
         syncRepositorySettings()
     }
 
+    fun setTargetState(state: LampState) {
+        viewModelScope.launch {
+            val ip = _espIp.value ?: ""
+            if (ip.isNotEmpty()) {
+                httpController.sendState(ip, state)
+            }
+        }
+    }
+
     // ===========================
     // Screen Time Monitoring
     // ===========================
@@ -121,7 +132,6 @@ class FocusViewModel(application: Application) : AndroidViewModel(application) {
         } else {
             distractingAppsManager.removeApp(packageName)
         }
-        // Refresh both the per-app list and distraction time
         refreshScreenTime()
         loadPerAppUsage()
     }
@@ -158,7 +168,6 @@ class FocusViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // Direct HTTP control wrappers for the UI
     fun sendFocusCommand() { viewModelScope.launch { repository.sendFocus() } }
     fun sendWarningCommand() { viewModelScope.launch { repository.sendWarning() } }
     fun sendDistractionCommand() { viewModelScope.launch { repository.sendDistraction() } }
@@ -245,11 +254,7 @@ class FocusViewModel(application: Application) : AndroidViewModel(application) {
     // Statistics
     // ===========================
 
-    // Note: Detailed App Usage and Weekly Usage were removed due to device limitations.
-    // The UI will now display Total Screen Time instead.
-
     fun loadDetailedStats() {
-        // Just trigger a refresh of the total screen time so the UI gets the latest number
         refreshScreenTime()
     }
 

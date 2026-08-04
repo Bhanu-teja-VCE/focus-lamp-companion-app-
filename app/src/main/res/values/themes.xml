@@ -1,17 +1,17 @@
 <resources>
 
-    <style name="Theme.FocusLamp" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Primary brand color — Electric Blue -->
+    <style name="Theme.FocusLamp" parent="Theme.Material3.Light.NoActionBar">
+        <!-- Primary brand color — Emerald Green -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryVariant">@color/colorPrimaryVariant</item>
         <item name="colorOnPrimary">@color/colorOnPrimary</item>
 
-        <!-- Secondary brand color -->
+        <!-- Secondary brand color — Calm Blue -->
         <item name="colorSecondary">@color/colorSecondary</item>
         <item name="colorSecondaryVariant">@color/colorSecondaryVariant</item>
         <item name="colorOnSecondary">@color/colorOnSecondary</item>
 
-        <!-- Background & Surface -->
+        <!-- Background & Surface — Soft Light Theme -->
         <item name="android:colorBackground">@color/colorBackground</item>
         <item name="colorSurface">@color/colorSurface</item>
         <item name="colorOnSurface">@color/colorOnSurface</item>
@@ -20,16 +20,16 @@
         <item name="colorError">@color/colorError</item>
         <item name="colorOnError">@color/colorOnError</item>
 
-        <!-- Status bar & nav bar — deep slate -->
-        <item name="android:statusBarColor">@color/background_dark</item>
-        <item name="android:navigationBarColor">@color/background_dark</item>
-        <item name="android:windowLightStatusBar">false</item>
+        <!-- Status bar & nav bar — Light status bar with dark icons -->
+        <item name="android:statusBarColor">@color/colorBackground</item>
+        <item name="android:navigationBarColor">@color/colorBackground</item>
+        <item name="android:windowLightStatusBar">true</item>
 
         <!-- Text input styling -->
         <item name="textInputStyle">@style/Widget.FocusLamp.TextInput</item>
     </style>
 
-    <!-- Custom TextInput style -->
+    <!-- Custom TextInput style for light theme -->
     <style name="Widget.FocusLamp.TextInput" parent="Widget.Material3.TextInputLayout.OutlinedBox">
         <item name="boxStrokeColor">@color/surface_border</item>
         <item name="boxCornerRadiusTopStart">12dp</item>

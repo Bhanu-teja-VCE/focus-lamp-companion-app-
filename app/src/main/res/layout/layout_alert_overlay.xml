@@ -1,53 +1,91 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center"
-    android:background="#E6000000"
+    android:background="#F2F6F9FC"
     android:padding="32dp"
     android:clickable="true"
     android:focusable="true">
 
-    <!-- The background is 90% opaque black (#E6000000) to hide everything behind it -->
-
-    <ImageView
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:src="@drawable/ic_lamp" 
-        app:tint="#EF4444" 
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:layout_marginBottom="16dp"/>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Limit Exceeded"
-        android:textSize="28sp"
-        android:textStyle="bold"
-        android:textColor="#EF4444"
-        android:layout_marginBottom="12dp" />
-
-    <TextView
-        android:id="@+id/tvOverlayAppName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="This app is blocked."
-        android:textSize="18sp"
-        android:textColor="#CCCCCC"
-        android:textAlignment="center"
-        android:layout_marginBottom="40dp" />
-
-    <Button
-        android:id="@+id/btnOverlayDismiss"
+    <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Go Back Home"
-        android:textColor="#FFFFFF"
-        android:backgroundTint="#EF4444"
-        android:padding="16dp"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:textAllCaps="false"/>
+        app:cardBackgroundColor="#FFFFFF"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="8dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="32dp">
+
+            <FrameLayout
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_marginBottom="20dp">
+
+                <View
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:background="@drawable/bg_chip_soft_green" />
+
+                <ImageView
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/ic_lamp"
+                    android:layout_gravity="center"
+                    app:tint="@color/primary_green" />
+
+            </FrameLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Take a Mindful Break 🌿"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_navy"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:id="@+id/tvOverlayAppName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Daily time limit reached for this app."
+                android:textSize="15sp"
+                android:textColor="@color/text_secondary"
+                android:textAlignment="center"
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Take a deep breath. Focus Lamp is helping you protect your attention and achieve your deep-work goals today."
+                android:textSize="13sp"
+                android:textColor="@color/text_muted"
+                android:textAlignment="center"
+                android:lineSpacingExtra="3dp"
+                android:layout_marginBottom="28dp" />
+
+            <Button
+                android:id="@+id/btnOverlayDismiss"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:text="Return to Focus"
+                android:textColor="@color/text_white"
+                android:backgroundTint="@color/primary_green"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:textAllCaps="false"
+                android:stateListAnimator="@null" />
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
 
 </LinearLayout>
