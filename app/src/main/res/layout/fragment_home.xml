@@ -35,6 +35,80 @@
             android:textSize="14sp" />
 
         <!-- ========================================= -->
+        <!--  SECTION: AI & Family Quick Access Banner  -->
+        <!-- ========================================= -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp"
+            android:baselineAligned="false">
+
+            <!-- AI Coach Banner Card -->
+            <LinearLayout
+                android:id="@+id/cardAiCoachQuick"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:background="@drawable/bg_card_light"
+                android:padding="16dp"
+                android:layout_marginEnd="6dp"
+                android:clickable="true"
+                android:focusable="true">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🤖 AI Focus Coach"
+                    android:textSize="14sp"
+                    android:textColor="@color/primary_blue"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="4dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Chat, adaptive limits & schedule parser"
+                    android:textSize="11sp"
+                    android:textColor="@color/text_secondary" />
+
+            </LinearLayout>
+
+            <!-- Family Hub Banner Card -->
+            <LinearLayout
+                android:id="@+id/cardFamilyQuick"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:background="@drawable/bg_card_light"
+                android:padding="16dp"
+                android:layout_marginStart="6dp"
+                android:clickable="true"
+                android:focusable="true">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="👨‍👩‍👧 Family Hub"
+                    android:textSize="14sp"
+                    android:textColor="@color/primary_green"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="4dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Parent controls & remote approvals"
+                    android:textSize="11sp"
+                    android:textColor="@color/text_secondary" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- ========================================= -->
         <!--  SECTION 1: Focus Ring (Circular Progress) -->
         <!-- ========================================= -->
         <LinearLayout
@@ -294,6 +368,20 @@
             </LinearLayout>
 
         </LinearLayout>
+
+        <!-- Insights Banner Button -->
+        <Button
+            android:id="@+id/btnViewInsights"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:backgroundTint="@color/soft_blue"
+            android:text="📊 View Detailed App Insights & Pickups"
+            android:textColor="@color/primary_blue"
+            android:textSize="14sp"
+            android:textAllCaps="false"
+            android:textStyle="bold"
+            android:stateListAnimator="@null"
+            android:layout_marginBottom="16dp" />
 
         <!-- ========================================= -->
         <!--  SECTION 3: Daily Goal Progress           -->

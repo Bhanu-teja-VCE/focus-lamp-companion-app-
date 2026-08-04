@@ -17,7 +17,8 @@ import com.focuslamp.app.utils.SettingsManager
 
 /**
  * Home screen — the premium dashboard matching the reference design.
- * Shows dual circular rings, stat cards, virtual lamp, and monitoring toggle.
+ * Shows dual circular rings, stat cards, virtual lamp, monitoring toggle,
+ * and quick access to AI Coach and Family Hub.
  */
 class HomeFragment : Fragment(R.layout.fragment_home) {
 
@@ -28,6 +29,23 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
         viewModel = ViewModelProvider(requireActivity())[FocusViewModel::class.java]
         val settingsManager = SettingsManager(requireContext())
+
+        // === Quick Access Banner Click Listeners ===
+        val cardAiCoachQuick = view.findViewById<View>(R.id.cardAiCoachQuick)
+        val cardFamilyQuick = view.findViewById<View>(R.id.cardFamilyQuick)
+        val btnViewInsights = view.findViewById<View>(R.id.btnViewInsights)
+
+        cardAiCoachQuick?.setOnClickListener {
+            findNavController().navigate(R.id.aiCoachFragment)
+        }
+
+        cardFamilyQuick?.setOnClickListener {
+            findNavController().navigate(R.id.familyFragment)
+        }
+
+        btnViewInsights?.setOnClickListener {
+            findNavController().navigate(R.id.insightsFragment)
+        }
 
         // === Find all views ===
         val progressFocusRing = view.findViewById<ProgressBar>(R.id.progressFocusTime)
@@ -216,12 +234,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         viewModel.loadStats()
     }
 
-    /**
-     * Updates the Virtual Lamp glow color and status text.
-     *  - GREEN: screenTime < 80% of limit
-     *  - WHITE: screenTime is approaching the limit
-     *  - RED:   screenTime >= limit
-     */
     private fun updateVirtualLamp(
         screenTimeMinutes: Long, limitMinutes: Long,
         glowView: View, statusView: TextView
