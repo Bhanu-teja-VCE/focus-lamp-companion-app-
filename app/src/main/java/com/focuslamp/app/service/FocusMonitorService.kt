@@ -36,6 +36,7 @@ class FocusMonitorService : Service() {
     private lateinit var httpLampController: HttpLampController
     private lateinit var settingsManager: SettingsManager
     private lateinit var overlayManager: OverlayManager
+    private lateinit var scheduleManager: com.focuslamp.app.utils.ScheduleManager
 
     private var monitoringJob: Job? = null
 
@@ -53,6 +54,7 @@ class FocusMonitorService : Service() {
         httpLampController = HttpLampController()
         settingsManager = SettingsManager(this)
         overlayManager = OverlayManager(this)
+        scheduleManager = com.focuslamp.app.utils.ScheduleManager(this)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -109,6 +111,9 @@ class FocusMonitorService : Service() {
 
             while (isActive) {
                 try {
+                    // 1. Check if Parent Scheduled Restriction (School Hours / Bedtime Mode) is active
+                    val activeScheduleReason = scheduleManager.getActiveRestrictionReason()
+
                     // Only count apps the user has marked as distracting!
                     val distractingLog = distractingAppsManager.getAll()
                     val distractionMinutes = screenTimeTracker.getDistractionTimeOnly(distractingLog)
@@ -122,13 +127,16 @@ class FocusMonitorService : Service() {
 
                     Log.d(
                         TAG,
-                        "DistractionOnly: ${distractionMinutes}min / Warning: ${warningThreshold}min / Limit: ${limitMinutes}min"
+                        "Schedule: $activeScheduleReason / DistractionOnly: ${distractionMinutes}min / Warning: ${warningThreshold}min / Limit: ${limitMinutes}min"
                     )
 
                     val espIp = settingsManager.espIp
                     val newMode: Int
 
-                    if (distractionMinutes >= limitMinutes) {
+                    if (activeScheduleReason != null) {
+                        // Scheduled Restriction (School Hours / Bedtime Mode) is active -> Force Red Lamp & Overlay
+                        newMode = 2
+                    } else if (distractionMinutes >= limitMinutes) {
                         newMode = 2
                     } else if (distractionMinutes >= warningThreshold) {
                         newMode = 1
