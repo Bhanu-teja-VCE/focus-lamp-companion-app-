@@ -19,6 +19,7 @@ class SettingsManager(context: Context) {
         private const val KEY_TIME_LIMIT = "time_limit_minutes"
         private const val KEY_USE_HTTP = "use_http_mode"
         private const val KEY_MONITORING_ACTIVE = "monitoring_active"
+        private const val KEY_GROQ_API_KEY = "groq_api_key"
 
         const val DEFAULT_IP = "192.168.4.1"
         const val DEFAULT_PORT = 8080
@@ -49,4 +50,13 @@ class SettingsManager(context: Context) {
     var isMonitoringActive: Boolean
         get() = prefs.getBoolean(KEY_MONITORING_ACTIVE, false)
         set(value) = prefs.edit().putBoolean(KEY_MONITORING_ACTIVE, value).apply()
+
+    /** Groq API Key for AI Coaching features */
+    var groqApiKey: String
+        get() = prefs.getString(KEY_GROQ_API_KEY, "") ?: ""
+        set(value) = prefs.edit().putString(KEY_GROQ_API_KEY, value.trim()).apply()
+
+    /** Returns true if a valid Groq API key has been configured */
+    val isAiEnabled: Boolean
+        get() = groqApiKey.isNotBlank()
 }

@@ -31,22 +31,24 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
 
         // Find views
         val etIpAddress = view.findViewById<EditText>(R.id.etIpAddress)
+        val etGroqApiKey = view.findViewById<EditText>(R.id.etGroqApiKey)
         val btnSave = view.findViewById<Button>(R.id.btnSaveSettings)
         val seekBarLimit = view.findViewById<SeekBar>(R.id.seekBarTimeLimit)
         val tvLimitValue = view.findViewById<TextView>(R.id.tvTimeLimitValue)
         val tvBlockedApps = view.findViewById<TextView>(R.id.tvBlockedAppsList)
         val btnSyncLamp = view.findViewById<Button>(R.id.btnSyncLamp)
         val btnGrantOverlay = view.findViewById<Button>(R.id.btnGrantOverlay)
+        val btnTestGroqKey = view.findViewById<Button>(R.id.btnTestGroqKey)
 
         // Load current values
         etIpAddress.setText(settingsManager.espIp)
+        etGroqApiKey.setText(settingsManager.groqApiKey)
         seekBarLimit.progress = settingsManager.timeLimitMinutes
         tvLimitValue.text = "${settingsManager.timeLimitMinutes} minutes"
 
         // Show blocked apps
         val blockedApps = com.focuslamp.app.data.tracking.DistractingAppsManager(requireContext()).getAll()
         tvBlockedApps.text = blockedApps.joinToString("\n") { packageName ->
-            // Show a friendly name by extracting from package
             "• ${packageName.substringAfterLast(".")}"
         }
 
@@ -73,6 +75,33 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
             }
         }
 
+        // Test Groq API Key
+        btnTestGroqKey.setOnClickListener {
+            val apiKey = etGroqApiKey.text.toString().trim()
+            if (apiKey.isEmpty()) {
+                etGroqApiKey.error = "Enter a Groq API Key first"
+                return@setOnClickListener
+            }
+
+            btnTestGroqKey.isEnabled = false
+            btnTestGroqKey.text = "Testing connection..."
+
+            androidx.lifecycle.lifecycleScope.launchWhenResumed {
+                val client = com.focuslamp.app.data.network.GroqApiClient()
+                val result = client.validateApiKey(apiKey)
+
+                btnTestGroqKey.isEnabled = true
+                btnTestGroqKey.text = "Test Groq API Key"
+
+                if (result.isSuccess) {
+                    settingsManager.groqApiKey = apiKey
+                    Toast.makeText(requireContext(), "✅ Groq API Key valid and saved!", Toast.LENGTH_LONG).show()
+                } else {
+                    Toast.makeText(requireContext(), "❌ Invalid Groq API Key: ${result.exceptionOrNull()?.localizedMessage}", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+
         // Save button
         btnSave.setOnClickListener {
             val ip = etIpAddress.text.toString().trim()
@@ -82,11 +111,13 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
             }
 
             val limit = maxOf(seekBarLimit.progress, 5)
+            val apiKey = etGroqApiKey.text.toString().trim()
 
             viewModel.updateEspIp(ip)
             viewModel.updateTimeLimit(limit)
+            settingsManager.groqApiKey = apiKey
 
-            Toast.makeText(requireContext(), "✅ Settings saved!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "✅ All Settings saved!", Toast.LENGTH_SHORT).show()
         }
 
         // Sync Lamp button — test connection
