@@ -37,6 +37,45 @@
         android:textStyle="bold"
         android:visibility="gone" />
 
+    <!-- Recovery Code Display Banner (shown ONCE at PIN setup) -->
+    <LinearLayout
+        android:id="@+id/containerRecoveryCodeDisplay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:background="#1E1B4B"
+        android:orientation="vertical"
+        android:padding="12dp"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🔑 SAVE YOUR RECOVERY CODE (SHOWN ONCE):"
+            android:textColor="#A5B4FC"
+            android:textSize="10sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvRecoveryCodeText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="FL-84A2-9B3C"
+            android:textColor="#F59E0B"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.1" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="Save this code in a safe place. Required if biometrics fail."
+            android:textColor="#94A3B8"
+            android:textSize="11sp" />
+    </LinearLayout>
+
     <EditText
         android:id="@+id/etPinInput"
         android:layout_width="match_parent"
@@ -54,10 +93,25 @@
         android:letterSpacing="0.3"
         android:gravity="center" />
 
+    <!-- Forgot PIN Action Link -->
+    <TextView
+        android:id="@+id/tvForgotPin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:layout_marginTop="8dp"
+        android:padding="4dp"
+        android:text="Forgot PIN?"
+        android:textColor="@color/primary_blue"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:clickable="true"
+        android:focusable="true" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="16dp"
         android:orientation="horizontal">
 
         <Button

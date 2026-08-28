@@ -61,8 +61,9 @@ dependencies {
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
-    // Security / EncryptedSharedPreferences
+    // Security / EncryptedSharedPreferences & Biometrics
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
+    implementation("androidx.biometric:biometric:1.1.0")
 
     // OkHttp — for HTTP requests to ESP32
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
