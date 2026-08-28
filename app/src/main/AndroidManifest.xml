@@ -47,6 +47,12 @@
             </intent-filter>
         </activity>
 
+        <!-- Parent Mode Authenticated Activity -->
+        <activity
+            android:name=".ui.parent.ParentModeActivity"
+            android:exported="false"
+            android:label="Parent Mode" />
+
         <!-- Foreground Service for Screen Time Monitoring -->
         <service
             android:name=".service.FocusMonitorService"

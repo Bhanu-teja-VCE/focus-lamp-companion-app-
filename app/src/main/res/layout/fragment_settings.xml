@@ -261,7 +261,7 @@
 
         </LinearLayout>
 
-        <!-- ===== SECTION 6: Parental Controls & PIN Security ===== -->
+        <!-- ===== SECTION 6: Parent Mode Redirect ===== -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -273,73 +273,31 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="🔒 Parental Controls & Security"
+                android:text="🛡️ Parent Mode & Security"
                 android:textSize="16sp"
                 android:textColor="@color/text_navy"
                 android:textStyle="bold"
                 android:layout_marginBottom="4dp" />
 
             <TextView
-                android:id="@+id/tvPinHintSettings"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Set a 4-digit Parent PIN to lock settings and schedule windows."
-                android:textSize="12sp"
+                android:text="Parent controls, PIN lock, School Hours, &amp; Bedtime Mode are managed in the authenticated Parent Mode Dashboard."
+                android:textSize="13sp"
                 android:textColor="@color/text_secondary"
                 android:layout_marginBottom="12dp" />
 
-            <LinearLayout
+            <Button
+                android:id="@+id/btnLaunchParentModeSettings"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="12dp">
-
-                <EditText
-                    android:id="@+id/etParentPinSettings"
-                    android:layout_width="0dp"
-                    android:layout_height="48dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/bg_input_light"
-                    android:hint="Enter 4-digit PIN"
-                    android:textColorHint="@color/text_muted"
-                    android:textColor="@color/text_navy"
-                    android:textSize="14sp"
-                    android:paddingHorizontal="16dp"
-                    android:inputType="numberPassword"
-                    android:maxLength="4" />
-
-                <Button
-                    android:id="@+id/btnSavePinSettings"
-                    android:layout_width="wrap_content"
-                    android:layout_height="48dp"
-                    android:layout_marginStart="8dp"
-                    android:backgroundTint="@color/primary_blue"
-                    android:text="Save PIN"
-                    android:textColor="@color/text_white"
-                    android:textSize="13sp"
-                    android:textStyle="bold"
-                    android:textAllCaps="false"
-                    android:stateListAnimator="@null" />
-            </LinearLayout>
-
-            <androidx.appcompat.widget.SwitchCompat
-                android:id="@+id/switchSchoolModeSettings"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="🏫 School Hours (Mon-Fri 8am-3pm)"
-                android:textColor="@color/text_navy"
-                android:textSize="13sp"
-                android:checked="true"
-                android:layout_marginBottom="8dp" />
-
-            <androidx.appcompat.widget.SwitchCompat
-                android:id="@+id/switchBedtimeModeSettings"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="🌙 Bedtime Mode (Daily 9pm-6am)"
-                android:textColor="@color/text_navy"
-                android:textSize="13sp"
-                android:checked="true" />
+                android:layout_height="48dp"
+                android:backgroundTint="@color/primary_blue"
+                android:text="Launch Parent Mode (PIN Required)"
+                android:textColor="@color/text_white"
+                android:textSize="14sp"
+                android:textAllCaps="false"
+                android:textStyle="bold"
+                android:stateListAnimator="@null" />
 
         </LinearLayout>
 

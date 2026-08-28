@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/parent_mode_nav_graph"
+    app:startDestination="@id/parentDashboardFragment">
+
+    <fragment
+        android:id="@+id/parentDashboardFragment"
+        android:name="com.focuslamp.app.ui.parent.ParentDashboardFragment"
+        android:label="Parent Dashboard"
+        tools:layout="@layout/fragment_parent_dashboard">
+
+        <action
+            android:id="@+id/action_parentDashboard_to_scheduleManager"
+            app:destination="@id/scheduleManagerFragment" />
+
+        <action
+            android:id="@+id/action_parentDashboard_to_extensionQueue"
+            app:destination="@id/extensionRequestQueueFragment" />
+
+        <action
+            android:id="@+id/action_parentDashboard_to_familySettings"
+            app:destination="@id/familySettingsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/scheduleManagerFragment"
+        android:name="com.focuslamp.app.ui.parent.ScheduleManagerFragment"
+        android:label="Scheduled Restriction Windows"
+        tools:layout="@layout/fragment_schedule_manager" />
+
+    <fragment
+        android:id="@+id/extensionRequestQueueFragment"
+        android:name="com.focuslamp.app.ui.parent.ExtensionRequestQueueFragment"
+        android:label="Pending Extension Requests"
+        tools:layout="@layout/fragment_extension_request_queue" />
+
+    <fragment
+        android:id="@+id/familySettingsFragment"
+        android:name="com.focuslamp.app.ui.parent.FamilySettingsFragment"
+        android:label="Family & Lamp Settings"
+        tools:layout="@layout/fragment_family_settings" />
+
+</navigation>

@@ -108,60 +108,13 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
             }
         }
 
-        // Bind Parental Controls
-        val pinManager = com.focuslamp.app.utils.ParentPinManager(requireContext())
-        val scheduleManager = com.focuslamp.app.utils.ScheduleManager(requireContext())
-
-        val etParentPinSettings = view.findViewById<EditText>(R.id.etParentPinSettings)
-        val btnSavePinSettings = view.findViewById<Button>(R.id.btnSavePinSettings)
-        val tvPinHintSettings = view.findViewById<TextView>(R.id.tvPinHintSettings)
-        val switchSchoolModeSettings = view.findViewById<androidx.appcompat.widget.SwitchCompat>(R.id.switchSchoolModeSettings)
-        val switchBedtimeModeSettings = view.findViewById<androidx.appcompat.widget.SwitchCompat>(R.id.switchBedtimeModeSettings)
-
-        switchSchoolModeSettings.isChecked = scheduleManager.isSchoolModeEnabled
-        switchBedtimeModeSettings.isChecked = scheduleManager.isBedtimeModeEnabled
-
-        if (pinManager.isPinSet()) {
-            tvPinHintSettings.text = "🔒 Parent PIN is ACTIVE."
-            btnSavePinSettings.text = "Clear PIN"
-        } else {
-            tvPinHintSettings.text = "Set a 4-digit Parent PIN to lock settings and schedule windows."
-            btnSavePinSettings.text = "Set PIN"
-        }
-
-        btnSavePinSettings.setOnClickListener {
-            val enteredPin = etParentPinSettings.text.toString().trim()
-            if (enteredPin.length != 4) {
-                etParentPinSettings.error = "PIN must be 4 digits"
-                return@setOnClickListener
-            }
-
-            if (pinManager.isPinSet()) {
-                if (pinManager.verifyPin(enteredPin)) {
-                    pinManager.clearPin(enteredPin)
-                    etParentPinSettings.setText("")
-                    tvPinHintSettings.text = "Set a 4-digit Parent PIN to lock settings."
-                    btnSavePinSettings.text = "Set PIN"
-                    Toast.makeText(requireContext(), "Parent PIN cleared.", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(requireContext(), "❌ Incorrect PIN!", Toast.LENGTH_SHORT).show()
-                }
-            } else {
-                if (pinManager.setPin(enteredPin)) {
-                    etParentPinSettings.setText("")
-                    tvPinHintSettings.text = "🔒 Parent PIN is ACTIVE."
-                    btnSavePinSettings.text = "Clear PIN"
-                    Toast.makeText(requireContext(), "🔒 Parent PIN saved!", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-
-        switchSchoolModeSettings.setOnCheckedChangeListener { _, isChecked ->
-            scheduleManager.isSchoolModeEnabled = isChecked
-        }
-
-        switchBedtimeModeSettings.setOnCheckedChangeListener { _, isChecked ->
-            scheduleManager.isBedtimeModeEnabled = isChecked
+        // Bind Parent Mode Launch Button
+        val btnLaunchParentMode = view.findViewById<Button>(R.id.btnLaunchParentModeSettings)
+        btnLaunchParentMode.setOnClickListener {
+            com.focuslamp.app.ui.ParentPinAuthDialog(requireContext()) {
+                val intent = Intent(requireContext(), com.focuslamp.app.ui.parent.ParentModeActivity::class.java)
+                startActivity(intent)
+            }.show()
         }
 
         // Save button

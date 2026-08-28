@@ -48,6 +48,23 @@
             android:textStyle="bold"
             android:letterSpacing="-0.02" />
 
+        <!-- Parent Mode Shield Button -->
+        <FrameLayout
+            android:id="@+id/btnHeaderParentMode"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_chip_soft_green"
+            android:layout_marginEnd="8dp">
+
+            <ImageView
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@drawable/ic_parent_shield"
+                android:layout_gravity="center"
+                app:tint="@color/primary_green" />
+
+        </FrameLayout>
+
         <!-- Settings Button -->
         <FrameLayout
             android:id="@+id/btnHeaderSettings"

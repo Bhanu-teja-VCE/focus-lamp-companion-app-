@@ -54,6 +54,14 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        // Header Parent Mode Shield button click (Requires PIN Auth first!)
+        binding.btnHeaderParentMode.setOnClickListener {
+            ParentPinAuthDialog(this) {
+                val intent = Intent(this, ParentModeActivity::class.java)
+                startActivity(intent)
+            }.show()
+        }
+
         // Check permissions on launch
         checkUsagePermission()
         checkNotificationPermission()

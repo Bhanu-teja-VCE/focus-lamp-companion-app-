@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0B0F19">
+
+    <!-- ===== Parent Mode Top Header Bar ===== -->
+    <LinearLayout
+        android:id="@+id/parentHeaderBar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="#1E1B4B"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="14dp"
+        android:paddingBottom="14dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <!-- Exit Parent Mode Button -->
+        <FrameLayout
+            android:id="@+id/btnExitParentMode"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
+            android:background="#312E81"
+            android:clickable="true"
+            android:focusable="true"
+            android:layout_marginEnd="12dp">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_home"
+                app:tint="#818CF8" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:letterSpacing="-0.01"
+                android:text="🛡️ PARENT MODE"
+                android:textColor="#E0E7FF"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvInactivityTimer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Authenticated • Auto-exit in 2m"
+                android:textColor="#A5B4FC"
+                android:textSize="11sp" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btnExitParentText"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:backgroundTint="#4338CA"
+            android:paddingHorizontal="12dp"
+            android:stateListAnimator="@null"
+            android:text="Exit Mode"
+            android:textAllCaps="false"
+            android:textColor="#EEF2FF"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
+    <!-- ===== Parent Mode Nav Host Fragment ===== -->
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/parent_nav_host_fragment"
+        android:name="androidx.navigation.fragment.NavHostFragment"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:defaultNavHost="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/parentHeaderBar"
+        app:navGraph="@navigation/parent_mode_nav_graph" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
