@@ -9,6 +9,7 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -18,11 +19,14 @@ import com.focuslamp.app.data.tracking.DistractingAppsManager
 import com.focuslamp.app.data.tracking.ScreenTimeTracker
 import com.focuslamp.app.utils.ScheduleManager
 import com.focuslamp.app.utils.SettingsManager
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * ParentDashboardFragment — Main landing dashboard after Parent PIN authentication.
- * Displays aggregate telemetry, state-colored restriction cards, extension badge counts, and quick navigation.
+ * Hardened with background coroutines for queryEvents(), OnBackPressedCallback root exit,
+ * and state-colored restriction cards.
  */
 class ParentDashboardFragment : Fragment() {
 
@@ -39,6 +43,16 @@ class ParentDashboardFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // 🔒 Security & UX Hardening #7: Handle back press on root dashboard to cleanly exit Parent Mode
+        requireActivity().onBackPressedDispatcher.addCallback(
+            viewLifecycleOwner,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    requireActivity().finish()
+                }
+            }
+        )
+
         val tvTotalTime = view.findViewById<TextView>(R.id.tvDashboardTotalTime)
         val tvDistractionTime = view.findViewById<TextView>(R.id.tvDashboardDistractionTime)
 
@@ -54,43 +68,48 @@ class ParentDashboardFragment : Fragment() {
         val btnNavExtensionQueue = view.findViewById<LinearLayout>(R.id.btnNavExtensionQueue)
         val btnNavFamilySettings = view.findViewById<LinearLayout>(R.id.btnNavFamilySettings)
 
-        // 1. Fetch Real Telemetry from queryEvents Engine
-        val tracker = ScreenTimeTracker(requireContext())
-        val settings = SettingsManager(requireContext())
-        val distractingManager = DistractingAppsManager(requireContext())
+        // 🔒 Performance Hardening #8: Run queryEvents() scan off the main thread on Dispatchers.IO
+        lifecycleScope.launch(Dispatchers.IO) {
+            val tracker = ScreenTimeTracker(requireContext())
+            val settings = SettingsManager(requireContext())
+            val distractingManager = DistractingAppsManager(requireContext())
 
-        val totalMins = tracker.getTotalScreenTimeToday()
-        val totalHours = totalMins / 60
-        val totalRemMins = totalMins % 60
-        tvTotalTime.text = "${totalHours}h ${totalRemMins}m"
+            val totalMins = tracker.getTotalScreenTimeToday()
+            val totalHours = totalMins / 60
+            val totalRemMins = totalMins % 60
 
-        val distractingSet = distractingManager.getDistractingApps()
-        val distractionMins = tracker.getDistractionTimeOnly(distractingSet)
-        val limitMins = settings.timeLimitMinutes
-        tvDistractionTime.text = "${distractionMins}m / ${limitMins}m"
+            val distractingSet = distractingManager.getDistractingApps()
+            val distractionMins = tracker.getDistractionTimeOnly(distractingSet)
+            val limitMins = settings.timeLimitMinutes
 
-        // 2. Evaluate Restriction Status Card Colors & State
-        val scheduleManager = ScheduleManager(requireContext())
-        val activeReason = scheduleManager.getActiveRestrictionReason()
+            val scheduleManager = ScheduleManager(requireContext())
+            val activeReason = scheduleManager.getActiveRestrictionReason()
 
-        if (activeReason != null) {
-            // RED CARD: Active restriction (School Hours / Bedtime Mode)
-            cardRestrictionStatus.setBackgroundColor(Color.parseColor("#DC2626"))
-            tvRestrictionText.text = "🚨 $activeReason"
-            tvRestrictionSub.text = "Focus Lamp LED is RED. Non-emergency apps are currently locked."
-        } else if (distractionMins >= limitMins) {
-            // RED CARD: Daily limit breached
-            cardRestrictionStatus.setBackgroundColor(Color.parseColor("#DC2626"))
-            tvRestrictionText.text = "🚨 DAILY FOCUS LIMIT EXCEEDED"
-            tvRestrictionSub.text = "Distraction usage reached ${distractionMins}m (Limit: ${limitMins}m). Focus Lamp is RED."
-        } else {
-            // GREEN CARD: Normal state
-            cardRestrictionStatus.setBackgroundColor(Color.parseColor("#16A34A"))
-            tvRestrictionText.text = "🟢 NO ACTIVE RESTRICTIONS"
-            tvRestrictionSub.text = "Child device is within limits and active schedule windows. Focus Lamp is GREEN."
+            withContext(Dispatchers.Main) {
+                tvTotalTime.text = "${totalHours}h ${totalRemMins}m"
+                tvDistractionTime.text = "${distractionMins}m / ${limitMins}m"
+
+                // Evaluate Restriction Status Card Colors & State
+                if (activeReason != null) {
+                    // RED CARD: Active restriction (School Hours / Bedtime Mode)
+                    cardRestrictionStatus.setBackgroundColor(Color.parseColor("#DC2626"))
+                    tvRestrictionText.text = "🚨 $activeReason"
+                    tvRestrictionSub.text = "Focus Lamp LED is RED. Non-emergency apps are currently locked."
+                } else if (distractionMins >= limitMins) {
+                    // RED CARD: Daily limit breached
+                    cardRestrictionStatus.setBackgroundColor(Color.parseColor("#DC2626"))
+                    tvRestrictionText.text = "🚨 DAILY FOCUS LIMIT EXCEEDED"
+                    tvRestrictionSub.text = "Distraction usage reached ${distractionMins}m (Limit: ${limitMins}m). Focus Lamp is RED."
+                } else {
+                    // GREEN CARD: Normal state
+                    cardRestrictionStatus.setBackgroundColor(Color.parseColor("#16A34A"))
+                    tvRestrictionText.text = "🟢 NO ACTIVE RESTRICTIONS"
+                    tvRestrictionSub.text = "Child device is within limits and active schedule windows. Focus Lamp is GREEN."
+                }
+            }
         }
 
-        // 3. Observe Extension Request Queue
+        // Observe Extension Request Queue
         lifecycleScope.launch {
             familyRepository.extensionRequests.collect { requests ->
                 val pendingList = requests.filter { it.isApproved == null }
@@ -114,7 +133,7 @@ class ParentDashboardFragment : Fragment() {
             }
         }
 
-        // 4. Quick Nav Actions
+        // Quick Nav Actions
         btnNavSchedules.setOnClickListener {
             findNavController().navigate(R.id.action_parentDashboard_to_scheduleManager)
         }

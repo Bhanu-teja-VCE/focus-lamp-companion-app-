@@ -156,7 +156,7 @@ class FocusMonitorService : Service() {
                     }
 
                     // --- OVERLAY & ALARM LOGIC ---
-                    if (newMode == 2) {
+                    if (newMode == 2 && !com.focuslamp.app.ui.parent.ParentModeActivity.isParentModeActive) {
                         // Limit exceeded. Let's see what app the user is actively looking at.
                         val currentApp = screenTimeTracker.getCurrentForegroundApp()
 
@@ -177,7 +177,7 @@ class FocusMonitorService : Service() {
                             }
                         }
                     } else {
-                        // User is within limits
+                        // User is within limits or authenticated parent is currently using Parent Mode
                         withContext(Dispatchers.Main) {
                             overlayManager.hideOverlay()
                         }

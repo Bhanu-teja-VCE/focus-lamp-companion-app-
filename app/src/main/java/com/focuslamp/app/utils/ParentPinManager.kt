@@ -2,24 +2,45 @@ package com.focuslamp.app.utils
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
 import java.security.MessageDigest
 import java.security.SecureRandom
 
 /**
- * ParentPinManager — Manages salted SHA-256 Parent PIN security and exponential backoff lockouts.
+ * ParentPinManager — Hardware KeyStore EncryptedSharedPreferences storage for salted SHA-256 Parent PIN
+ * and persistent exponential backoff lockouts surviving process force-closes & device reboots.
  */
 class ParentPinManager(context: Context) {
 
-    private val prefs: SharedPreferences = context.getSharedPreferences(
-        "parent_pin_secure_prefs", Context.MODE_PRIVATE
-    )
+    private val prefs: SharedPreferences = createEncryptedPrefs(context)
 
     companion object {
+        private const val PREFS_FILENAME = "parent_pin_secure_encrypted_prefs"
         private const val KEY_PIN_HASH = "parent_pin_hash_salted"
         private const val KEY_PIN_SALT = "parent_pin_salt"
         private const val KEY_PIN_ENABLED = "parent_pin_enabled"
         private const val KEY_FAILED_ATTEMPTS = "failed_attempts_count"
         private const val KEY_LOCKOUT_UNTIL_MS = "lockout_until_timestamp_ms"
+
+        private fun createEncryptedPrefs(context: Context): SharedPreferences {
+            return try {
+                val masterKey = MasterKey.Builder(context)
+                    .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                    .build()
+
+                EncryptedSharedPreferences.create(
+                    context,
+                    PREFS_FILENAME,
+                    masterKey,
+                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SKEY_TEXT,
+                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                )
+            } catch (e: Exception) {
+                // Fallback to MODE_PRIVATE if Keystore hardware is uninitialized
+                context.getSharedPreferences(PREFS_FILENAME, Context.MODE_PRIVATE)
+            }
+        }
     }
 
     /** Returns true if a Parent PIN has been set */
@@ -39,7 +60,7 @@ class ParentPinManager(context: Context) {
             .putBoolean(KEY_PIN_ENABLED, true)
             .putInt(KEY_FAILED_ATTEMPTS, 0)
             .putLong(KEY_LOCKOUT_UNTIL_MS, 0L)
-            .apply()
+            .commit()
         return true
     }
 
@@ -61,7 +82,7 @@ class ParentPinManager(context: Context) {
         return isValid
     }
 
-    /** Returns lockout seconds remaining (0 if not locked out) */
+    /** Returns lockout seconds remaining (0 if not locked out) — Reads disk timestamp surviving force-close */
     fun getLockoutSecondsRemaining(): Int {
         val lockoutUntil = prefs.getLong(KEY_LOCKOUT_UNTIL_MS, 0L)
         val now = System.currentTimeMillis()
@@ -91,14 +112,14 @@ class ParentPinManager(context: Context) {
         prefs.edit()
             .putInt(KEY_FAILED_ATTEMPTS, currentFailed)
             .putLong(KEY_LOCKOUT_UNTIL_MS, lockoutUntil)
-            .apply()
+            .commit()
     }
 
     private fun resetFailedAttempts() {
         prefs.edit()
             .putInt(KEY_FAILED_ATTEMPTS, 0)
             .putLong(KEY_LOCKOUT_UNTIL_MS, 0L)
-            .apply()
+            .commit()
     }
 
     /** Clears the Parent PIN */
@@ -110,7 +131,7 @@ class ParentPinManager(context: Context) {
                 .putBoolean(KEY_PIN_ENABLED, false)
                 .putInt(KEY_FAILED_ATTEMPTS, 0)
                 .putLong(KEY_LOCKOUT_UNTIL_MS, 0L)
-                .apply()
+                .commit()
             return true
         }
         return false
@@ -122,7 +143,7 @@ class ParentPinManager(context: Context) {
             val randomBytes = ByteArray(16)
             SecureRandom().nextBytes(randomBytes)
             salt = randomBytes.joinToString("") { "%02x".format(it) }
-            prefs.edit().putString(KEY_PIN_SALT, salt).apply()
+            prefs.edit().putString(KEY_PIN_SALT, salt).commit()
         }
         return salt
     }
