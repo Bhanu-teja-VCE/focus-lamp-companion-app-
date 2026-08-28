@@ -11,12 +11,14 @@ import java.util.Calendar
 
 /**
  * ScreenTimeTracker — ActionDash & Digital Wellbeing grade screen time engine.
- * Calculates exact foreground usage and total screen time using Android UsageStatsManager.
+ * Reconstructs exact per-app foreground usage and screen time from Android UsageEvents stream,
+ * handling screen off events, app switching, and OEM fallback.
  */
 class ScreenTimeTracker(private val context: Context) {
 
     /**
-     * Check if the user has granted Usage Access permission.
+     * Checks if the user has granted Usage Access permission (PACKAGE_USAGE_STATS).
+     * Uses AppOpsManager.checkOpNoThrow for reliable runtime check across OEM devices.
      */
     fun hasUsagePermission(): Boolean {
         val appOpsManager = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
@@ -29,30 +31,32 @@ class ScreenTimeTracker(private val context: Context) {
     }
 
     /**
-     * Calculates the total time the user has actively been using the phone today (Screen On / Foreground Apps).
-     * Uses ActionDash-grade event tracking (ACTIVITY_RESUMED & ACTIVITY_PAUSED) with daily aggregate fallback.
+     * Reconstructs exact foreground durations for all apps from UsageEvents stream since midnight.
+     * Properly handles SCREEN_NON_INTERACTIVE and KEYGUARD_SHOWN events so screen-off time
+     * does not inflate app usage.
      */
-    fun getTotalScreenTimeToday(): Long {
-        if (!hasUsagePermission()) return 0L
+    private fun getExactAppDurationsToday(): Map<String, Long> {
+        if (!hasUsagePermission()) return emptyMap()
 
         val usageStatsManager =
             context.getSystemService(Context.USAGE_STATS_SERVICE) as? UsageStatsManager
-                ?: return 0L
+                ?: return emptyMap()
 
         val startTime = getMidnightTimestamp()
         val endTime = System.currentTimeMillis()
 
-        // 1. Primary Method: Query exact Activity events since midnight
-        val usageEvents = usageStatsManager.queryEvents(startTime, endTime)
+        val usageEvents = usageStatsManager.queryEvents(startTime, endTime) ?: return emptyMap()
         val event = UsageEvents.Event()
 
-        var totalForegroundMs = 0L
-        val appResumedTimes = mutableMapOf<String, Long>()
+        val appDurations = mutableMapOf<String, Long>()
         val ignoredPackages = setOf(
             "com.android.systemui",
             "android",
             "com.google.android.inputmethod.latin"
         )
+
+        var lastResumedPkg: String? = null
+        var lastResumedTime: Long = 0L
 
         while (usageEvents.hasNextEvent()) {
             usageEvents.getNextEvent(event)
@@ -62,44 +66,71 @@ class ScreenTimeTracker(private val context: Context) {
 
             when (event.eventType) {
                 UsageEvents.Event.ACTIVITY_RESUMED -> {
-                    appResumedTimes[pkg] = event.timeStamp
-                }
-                UsageEvents.Event.ACTIVITY_PAUSED, UsageEvents.Event.ACTIVITY_STOPPED -> {
-                    val start = appResumedTimes.remove(pkg)
-                    if (start != null && start > 0) {
-                        val duration = event.timeStamp - start
+                    // Close previous active app session if user switched apps without pause event
+                    if (lastResumedPkg != null && lastResumedPkg != pkg) {
+                        val duration = event.timeStamp - lastResumedTime
                         if (duration in 1..86400000L) {
-                            totalForegroundMs += duration
+                            appDurations[lastResumedPkg!!] = (appDurations[lastResumedPkg!!] ?: 0L) + duration
                         }
+                    }
+                    lastResumedPkg = pkg
+                    lastResumedTime = event.timeStamp
+                }
+
+                UsageEvents.Event.ACTIVITY_PAUSED, UsageEvents.Event.ACTIVITY_STOPPED -> {
+                    if (lastResumedPkg == pkg) {
+                        val duration = event.timeStamp - lastResumedTime
+                        if (duration in 1..86400000L) {
+                            appDurations[pkg] = (appDurations[pkg] ?: 0L) + duration
+                        }
+                        lastResumedPkg = null
+                    }
+                }
+
+                // Handle screen off or device lock — end active foreground session
+                UsageEvents.Event.SCREEN_NON_INTERACTIVE, UsageEvents.Event.KEYGUARD_SHOWN -> {
+                    if (lastResumedPkg != null) {
+                        val duration = event.timeStamp - lastResumedTime
+                        if (duration in 1..86400000L) {
+                            appDurations[lastResumedPkg!!] = (appDurations[lastResumedPkg!!] ?: 0L) + duration
+                        }
+                        lastResumedPkg = null
                     }
                 }
             }
         }
 
-        // Include currently active foreground app
-        for ((_, start) in appResumedTimes) {
-            val duration = endTime - start
+        // Account for currently active app running up to current time
+        if (lastResumedPkg != null) {
+            val duration = endTime - lastResumedTime
             if (duration in 1..86400000L) {
-                totalForegroundMs += duration
+                appDurations[lastResumedPkg!!] = (appDurations[lastResumedPkg!!] ?: 0L) + duration
             }
         }
 
-        // 2. Fallback Method: Sum from UsageStats Manager daily interval
-        if (totalForegroundMs <= 0L) {
+        // Fallback to queryUsageStats if queryEvents returned no data (e.g., OEM restriction or fresh boot)
+        if (appDurations.isEmpty()) {
             val stats = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, startTime, endTime)
             if (!stats.isNullOrEmpty()) {
-                totalForegroundMs = stats
-                    .filter { !ignoredPackages.contains(it.packageName) && it.lastTimeUsed >= startTime }
-                    .sumOf { it.totalTimeInForeground }
+                for (s in stats) {
+                    if (!ignoredPackages.contains(s.packageName) && s.lastTimeUsed >= startTime) {
+                        appDurations[s.packageName] = s.totalTimeInForeground
+                    }
+                }
             }
         }
 
-        return (totalForegroundMs / 1000 / 60).coerceAtLeast(0L)
+        return appDurations
     }
 
-    // -------------------------------------------------------------------------
-    // Per-App Usage (ActionDash & Digital Wellbeing Accuracy)
-    // -------------------------------------------------------------------------
+    /**
+     * Calculates total active daily screen time (in minutes).
+     */
+    fun getTotalScreenTimeToday(): Long {
+        val appDurations = getExactAppDurationsToday()
+        val totalMs = appDurations.values.sum()
+        return (totalMs / 1000 / 60).coerceAtLeast(0L)
+    }
 
     data class AppUsageInfo(
         val packageName: String,
@@ -110,29 +141,14 @@ class ScreenTimeTracker(private val context: Context) {
     )
 
     /**
-     * Returns a list of apps with their individual foreground usage today,
-     * sorted by most usage first. Marks apps in the distracting set.
+     * Returns a sorted list of apps with individual foreground usage today using queryEvents stream.
      */
     fun getPerAppUsageToday(distractingPackages: Set<String> = emptySet()): List<AppUsageInfo> {
-        if (!hasUsagePermission()) return emptyList()
-
-        val usageStatsManager =
-            context.getSystemService(Context.USAGE_STATS_SERVICE) as? UsageStatsManager
-                ?: return emptyList()
-
-        val endTime = System.currentTimeMillis()
-        val startTime = getMidnightTimestamp()
-
-        val stats = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, startTime, endTime)
+        val appDurations = getExactAppDurationsToday()
         val pm = context.packageManager
         val results = mutableListOf<AppUsageInfo>()
 
-        val grouped = stats?.filter { it.lastTimeUsed >= startTime }?.groupBy { it.packageName } ?: emptyMap()
-
-        for ((packageName, pkgStats) in grouped) {
-            if (packageName == "android" || packageName == "com.android.systemui") continue
-
-            val totalTimeMs = pkgStats.sumOf { it.totalTimeInForeground }
+        for ((packageName, totalTimeMs) in appDurations) {
             if (totalTimeMs >= 60_000) { // >= 1 minute
                 val minutes = totalTimeMs / (1000 * 60)
 
@@ -158,30 +174,19 @@ class ScreenTimeTracker(private val context: Context) {
     }
 
     /**
-     * Returns the total screen time (in minutes) for only the apps
-     * the user has marked as "distracting".
+     * Returns the total screen time (in minutes) for only the user-blacklisted distracting apps.
      */
     fun getDistractionTimeOnly(distractingPackages: Set<String>): Long {
-        if (!hasUsagePermission() || distractingPackages.isEmpty()) return 0L
+        if (distractingPackages.isEmpty()) return 0L
 
-        val usageStatsManager =
-            context.getSystemService(Context.USAGE_STATS_SERVICE) as? UsageStatsManager
-                ?: return 0L
-
-        val endTime = System.currentTimeMillis()
-        val startTime = getMidnightTimestamp()
-
-        val stats = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, startTime, endTime)
-        val totalDistractionMs = stats
-            ?.filter { distractingPackages.contains(it.packageName) && it.lastTimeUsed >= startTime }
-            ?.sumOf { it.totalTimeInForeground } ?: 0L
+        val appDurations = getExactAppDurationsToday()
+        val totalDistractionMs = appDurations
+            .filter { distractingPackages.contains(it.key) }
+            .values
+            .sum()
 
         return (totalDistractionMs / 1000 / 60).coerceAtLeast(0L)
     }
-
-    // -------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------
 
     private fun getMidnightTimestamp(): Long {
         return Calendar.getInstance().apply {
@@ -193,8 +198,8 @@ class ScreenTimeTracker(private val context: Context) {
     }
 
     /**
-     * Determines the exact app package currently in the foreground by looking
-     * at the most recent ACTIVITY_RESUMED event in the last 5 minutes.
+     * Determines the exact app package currently in the foreground by checking
+     * the most recent ACTIVITY_RESUMED event in the last 5 minutes.
      */
     fun getCurrentForegroundApp(): String? {
         if (!hasUsagePermission()) return null
@@ -205,7 +210,7 @@ class ScreenTimeTracker(private val context: Context) {
         val endTime = System.currentTimeMillis()
         val startTime = endTime - (1000 * 60 * 5) // Look back 5 minutes
 
-        val usageEvents = usageStatsManager.queryEvents(startTime, endTime)
+        val usageEvents = usageStatsManager.queryEvents(startTime, endTime) ?: return null
         val event = UsageEvents.Event()
         var currentForegroundApp: String? = null
 

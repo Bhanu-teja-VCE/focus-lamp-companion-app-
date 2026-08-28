@@ -191,6 +191,19 @@
                 android:textSize="14sp"
                 android:textAllCaps="false"
                 android:textStyle="bold"
+                android:stateListAnimator="@null"
+                android:layout_marginBottom="8dp" />
+
+            <Button
+                android:id="@+id/btnOemAutoStart"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:backgroundTint="@color/primary_blue"
+                android:text="Vivo / OEM AutoStart Settings"
+                android:textColor="@color/text_white"
+                android:textSize="14sp"
+                android:textAllCaps="false"
+                android:textStyle="bold"
                 android:stateListAnimator="@null" />
 
         </LinearLayout>

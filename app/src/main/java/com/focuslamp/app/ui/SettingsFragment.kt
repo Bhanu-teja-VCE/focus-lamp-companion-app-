@@ -38,6 +38,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         val tvBlockedApps = view.findViewById<TextView>(R.id.tvBlockedAppsList)
         val btnSyncLamp = view.findViewById<Button>(R.id.btnSyncLamp)
         val btnGrantOverlay = view.findViewById<Button>(R.id.btnGrantOverlay)
+        val btnOemAutoStart = view.findViewById<Button>(R.id.btnOemAutoStart)
         val btnTestGroqKey = view.findViewById<Button>(R.id.btnTestGroqKey)
 
         // Load current values
@@ -73,6 +74,11 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
             } else {
                 Toast.makeText(requireContext(), "Permission already granted!", Toast.LENGTH_SHORT).show()
             }
+        }
+
+        // Open Vivo / OEM AutoStart settings
+        btnOemAutoStart.setOnClickListener {
+            com.focuslamp.app.utils.OemUtils.openOemAutoStartSettings(requireContext())
         }
 
         // Test Groq API Key
