@@ -53,6 +53,13 @@
             android:exported="false"
             android:label="Parent Mode" />
 
+        <!-- AI Assistant Full-Screen Dedicated Activity -->
+        <activity
+            android:name=".ui.chat.AiChatActivity"
+            android:exported="false"
+            android:label="AI Focus Assistant"
+            android:windowSoftInputMode="adjustResize" />
+
         <!-- Foreground Service for Screen Time Monitoring -->
         <service
             android:name=".service.FocusMonitorService"

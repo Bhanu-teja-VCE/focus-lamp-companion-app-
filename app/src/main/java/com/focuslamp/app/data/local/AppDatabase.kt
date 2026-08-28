@@ -6,12 +6,13 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 /**
- * Room database for Focus Lamp session history.
+ * Room database for Focus Lamp session history and AI Chat messages.
  */
-@Database(entities = [SessionEntity::class], version = 1, exportSchema = false)
+@Database(entities = [SessionEntity::class, ChatMessageEntity::class], version = 2, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun sessionDao(): SessionDao
+    abstract fun chatMessageDao(): ChatMessageDao
 
     companion object {
         @Volatile
@@ -23,7 +24,9 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "focus_lamp_database"
-                ).build()
+                )
+                .fallbackToDestructiveMigration()
+                .build()
                 INSTANCE = instance
                 instance
             }

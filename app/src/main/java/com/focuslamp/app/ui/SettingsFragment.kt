@@ -29,6 +29,13 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         viewModel = ViewModelProvider(requireActivity())[FocusViewModel::class.java]
         val settingsManager = SettingsManager(requireContext())
 
+        // Bind AI Island Chat Button
+        val btnAiIslandChat = view.findViewById<LinearLayout>(R.id.btnAiIslandChat)
+        btnAiIslandChat.setOnClickListener {
+            val intent = Intent(requireContext(), com.focuslamp.app.ui.chat.AiChatActivity::class.java)
+            startActivity(intent)
+        }
+
         // Find views
         val etIpAddress = view.findViewById<EditText>(R.id.etIpAddress)
         val etGroqApiKey = view.findViewById<EditText>(R.id.etGroqApiKey)
