@@ -17,13 +17,8 @@
         android:title="Lamp" />
 
     <item
-        android:id="@+id/aiCoachFragment"
-        android:icon="@drawable/ic_coach"
-        android:title="AI Coach" />
-
-    <item
-        android:id="@+id/familyFragment"
-        android:icon="@drawable/ic_family"
-        android:title="Family" />
+        android:id="@+id/settingsFragment"
+        android:icon="@drawable/ic_settings"
+        android:title="Settings" />
 
 </menu>
