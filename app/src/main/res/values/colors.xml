@@ -1,50 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- ===== Premium Dark Slate Design System ===== -->
+    <!-- Desk at night: the room the lamp sits in -->
+    <color name="night">#171A27</color>
+    <color name="surface">#212538</color>
+    <color name="surface_raised">#2B3048</color>
+    <color name="outline">#3A3F5A</color>
+    <color name="scrim">#E6171A27</color>
 
-    <!-- Primary Backgrounds & Surfaces -->
-    <color name="colorBackground">#0F172A</color>
-    <color name="background_dark">#0F172A</color>       <!-- Deep Slate 900 -->
-    <color name="colorSurface">#1E293B</color>          <!-- Slate 800 (cards) -->
-    <color name="surface_dark">#1E293B</color>          <!-- Slate 800 -->
-    <color name="surface_border">#334155</color>        <!-- Slate 700 -->
-    <color name="divider">#334155</color>
+    <!-- Paper: text and primary actions -->
+    <color name="paper">#F1EADB</color>
+    <color name="text_secondary">#A9A6BA</color>
+    <color name="text_faint">#6F6D85</color>
 
-    <!-- Primary Brand & Accent Colors -->
-    <color name="primary_green">#22C55E</color>
-    <color name="soft_green">#1A22C55E</color>
-    <color name="primary_blue">#3B82F6</color>
-    <color name="soft_blue">#1A3B82F6</color>
-    <color name="warning_amber">#F59E0B</color>
-    <color name="danger_red">#EF4444</color>
+    <!-- The lamp's own states. These are the only saturated colors in the app,
+         so color always means "what the lamp is doing". -->
+    <color name="lamp_green">#7BD88F</color>
+    <color name="lamp_warm">#F4E3B2</color>
+    <color name="lamp_red">#FF7262</color>
+    <color name="lamp_off">#4B4F68</color>
 
-    <!-- Text Colors -->
-    <color name="text_navy">#F1F5F9</color>             <!-- Slate 100 (Primary text) -->
-    <color name="text_secondary">#94A3B8</color>         <!-- Slate 400 (Secondary text) -->
-    <color name="text_muted">#64748B</color>             <!-- Slate 500 (Muted text) -->
-    <color name="text_white">#FFFFFF</color>
+    <!-- Parent / family accent -->
+    <color name="amber">#F2B648</color>
 
-    <!-- Material Theme Overrides -->
-    <color name="colorPrimary">#3B82F6</color>
-    <color name="colorPrimaryVariant">#1D4ED8</color>
-    <color name="colorOnPrimary">#FFFFFF</color>
-    <color name="colorSecondary">#22C55E</color>
-    <color name="colorSecondaryVariant">#166534</color>
-    <color name="colorOnSecondary">#0F172A</color>
-    <color name="colorOnSurface">#F1F5F9</color>
-    <color name="colorError">#EF4444</color>
-    <color name="colorOnError">#FFFFFF</color>
-    <color name="colorOnBackground">#F1F5F9</color>
-
-    <!-- Compatibility aliases -->
-    <color name="primary">#3B82F6</color>
-    <color name="accent_green">#22C55E</color>
-    <color name="accent_green_bg">#1A22C55E</color>
-    <color name="accent_red">#EF4444</color>
-    <color name="accent_red_bg">#1AEF4444</color>
-    <color name="focus_green">#22C55E</color>
-    <color name="warning_red">#EF4444</color>
-    <color name="status_online">#22C55E</color>
-    <color name="status_offline">#94A3B8</color>
-    <color name="progress_track">#334155</color>
+    <color name="lamp_green_soft">#267BD88F</color>
+    <color name="lamp_red_soft">#26FF7262</color>
+    <color name="amber_soft">#26F2B648</color>
 </resources>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_student"
+    app:startDestination="@id/todayFragment">
+
+    <fragment android:id="@+id/todayFragment" android:name="com.focuslamp.app.ui.today.TodayFragment" android:label="@string/title_today" />
+    <fragment android:id="@+id/usageFragment" android:name="com.focuslamp.app.ui.usage.UsageFragment" android:label="@string/title_usage" />
+    <fragment android:id="@+id/focusFragment" android:name="com.focuslamp.app.ui.focus.FocusFragment" android:label="@string/title_focus" />
+    <fragment android:id="@+id/familyFragment" android:name="com.focuslamp.app.ui.family.FamilyFragment" android:label="@string/title_family" />
+    <fragment android:id="@+id/lampFragment" android:name="com.focuslamp.app.ui.lamp.LampFragment" android:label="@string/title_lamp" />
+    <fragment android:id="@+id/settingsFragment" android:name="com.focuslamp.app.ui.settings.SettingsFragment" android:label="@string/title_settings" />
+    <fragment android:id="@+id/rulesEditorFragment" android:name="com.focuslamp.app.ui.family.RulesEditorFragment" android:label="@string/title_parent_controls" />
+</navigation>

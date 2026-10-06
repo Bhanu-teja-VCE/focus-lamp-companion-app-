@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clipToPadding="false"
+    android:paddingBottom="24dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="@dimen/screen_padding"
+        android:paddingTop="8dp">
+
+        <!-- Firebase not configured in this build -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/setupCard"
+            style="@style/Card.Section"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone">
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+                <TextView style="@style/Text.Heading" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/parent_setup_title" />
+                <TextView style="@style/Text.Secondary" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="@string/parent_setup_text" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- No family yet -->
+        <LinearLayout
+            android:id="@+id/createSection"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView style="@style/Text.Heading" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/create_family_title" />
+            <TextView style="@style/Text.Secondary" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="@string/create_family_text" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/createFamily"
+                style="@style/Button.Paper"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="@string/create_family" />
+        </LinearLayout>
+
+        <!-- Pairing code -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/codeCard"
+            style="@style/Card.Section"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone">
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+                <TextView style="@style/Text.Heading" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/add_child_title" />
+                <TextView android:id="@+id/codeHint" style="@style/Text.Secondary" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="@string/add_child_text" />
+                <TextView android:id="@+id/code" style="@style/Text.Display" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:letterSpacing="0.15" android:textIsSelectable="true" android:visibility="gone" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/newCode"
+                    style="@style/Button.Quiet"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/show_code" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <LinearLayout
+            android:id="@+id/childrenList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="vertical" />
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

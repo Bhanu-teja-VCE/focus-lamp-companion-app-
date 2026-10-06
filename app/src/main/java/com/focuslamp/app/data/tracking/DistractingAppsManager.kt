@@ -2,67 +2,55 @@ package com.focuslamp.app.data.tracking
 
 import android.content.Context
 import android.content.SharedPreferences
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 /**
- * Manages a list of "distracting" app package names stored in SharedPreferences.
- * Users can add/remove apps they consider distracting (e.g., Instagram, YouTube, Twitter).
+ * The apps the student has ticked as distracting. Only these count toward the daily
+ * distraction budget that drives the lamp.
  */
 class DistractingAppsManager(context: Context) {
 
-    private val prefs: SharedPreferences = context.getSharedPreferences(
-        "focus_lamp_distracting_apps", Context.MODE_PRIVATE
-    )
+    private val prefs: SharedPreferences =
+        context.getSharedPreferences("focus_lamp_distracting_apps", Context.MODE_PRIVATE)
+
+    private val _apps = MutableStateFlow(read())
+    val apps: StateFlow<Set<String>> = _apps.asStateFlow()
+
+    fun getAll(): Set<String> = _apps.value
+
+    fun isDistracting(packageName: String) = packageName in _apps.value
+
+    fun setDistracting(packageName: String, distracting: Boolean) {
+        val next = _apps.value.toMutableSet()
+        if (distracting) next += packageName else next -= packageName
+        write(next)
+    }
+
+    fun setApps(packages: Set<String>) = write(packages)
+
+    private fun read(): Set<String> =
+        prefs.getStringSet(KEY_APPS, null)?.toSet() ?: DEFAULT_APPS
+
+    private fun write(set: Set<String>) {
+        // Always store a fresh copy: SharedPreferences must not be handed a set it already owns.
+        prefs.edit().putStringSet(KEY_APPS, HashSet(set)).apply()
+        _apps.value = set.toSet()
+    }
 
     companion object {
         private const val KEY_APPS = "distracting_apps"
 
-        // Default distracting apps — common social media
         val DEFAULT_APPS = setOf(
             "com.instagram.android",
             "com.twitter.android",
-            "com.zhiliaoapp.musically",   // TikTok
+            "com.zhiliaoapp.musically",
+            "com.ss.android.ugc.trill",
             "com.snapchat.android",
             "com.facebook.katana",
-            "com.google.android.youtube"
+            "com.google.android.youtube",
+            "com.reddit.frontpage"
         )
-    }
-
-    /**
-     * Get all distracting app package names.
-     */
-    fun getAll(): Set<String> {
-        return prefs.getStringSet(KEY_APPS, DEFAULT_APPS) ?: DEFAULT_APPS
-    }
-
-    /**
-     * Add a package name to the distracting list.
-     */
-    fun addApp(packageName: String) {
-        val current = getAll().toMutableSet()
-        current.add(packageName)
-        prefs.edit().putStringSet(KEY_APPS, current).apply()
-    }
-
-    /**
-     * Remove a package name from the distracting list.
-     */
-    fun removeApp(packageName: String) {
-        val current = getAll().toMutableSet()
-        current.remove(packageName)
-        prefs.edit().putStringSet(KEY_APPS, current).apply()
-    }
-
-    /**
-     * Replace the entire list.
-     */
-    fun setApps(packages: Set<String>) {
-        prefs.edit().putStringSet(KEY_APPS, packages).apply()
-    }
-
-    /**
-     * Reset to defaults.
-     */
-    fun resetToDefaults() {
-        prefs.edit().putStringSet(KEY_APPS, DEFAULT_APPS).apply()
     }
 }

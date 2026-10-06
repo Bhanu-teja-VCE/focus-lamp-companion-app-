@@ -1,380 +1,95 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorBackground"
-    android:fillViewport="true"
     android:clipToPadding="false"
-    android:paddingBottom="80dp">
+    android:paddingBottom="@dimen/bottom_bar_clearance">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingHorizontal="20dp"
-        android:paddingTop="16dp">
+        android:paddingHorizontal="@dimen/screen_padding"
+        android:paddingTop="8dp">
 
-        <TextView
+        <TextView style="@style/Text.Heading" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/daily_budget" />
+        <TextView style="@style/Text.Secondary" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="@string/daily_budget_hint" />
+
+        <TextView android:id="@+id/budgetValue" style="@style/Text.Number" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:textSize="24sp" />
+
+        <com.google.android.material.slider.Slider
+            android:id="@+id/budgetSlider"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/daily_budget"
+            android:stepSize="5"
+            android:valueFrom="5"
+            android:valueTo="240"
+            app:labelBehavior="gone"
+            app:thumbColor="@color/paper"
+            app:trackColorActive="@color/paper"
+            app:trackColorInactive="@color/surface_raised" />
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/blockOnBudget"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="56dp"
+            android:text="@string/block_on_budget"
+            android:textAppearance="@style/Text.Body" />
+
+        <TextView style="@style/Text.Heading" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="@dimen/section_gap" android:text="@string/permissions" />
+        <LinearLayout android:id="@+id/permissionRows" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/autoStart"
+            style="@style/Button.Quiet"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="⚙️ App Settings & Hardware"
-            android:textColor="@color/text_navy"
-            android:textSize="24sp"
-            android:textStyle="bold" />
+            android:layout_marginTop="4dp"
+            android:text="@string/oem_autostart"
+            android:visibility="gone" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:text="Manage ESP32 network sync, distraction limits, and system permissions."
-            android:textColor="@color/text_secondary"
-            android:textSize="14sp" />
+        <TextView style="@style/Text.Heading" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="@dimen/section_gap" android:text="@string/coach" />
+        <TextView style="@style/Text.Secondary" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="@string/coach_key_hint" />
 
-        <!-- ===== AI ISLAND PILL BUTTON ===== -->
-        <LinearLayout
-            android:id="@+id/btnAiIslandChat"
-            android:layout_width="match_parent"
-            android:layout_height="64dp"
-            android:layout_marginTop="16dp"
-            android:background="@drawable/bg_ai_island_pill"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingHorizontal="20dp"
-            android:elevation="6dp">
-
-            <FrameLayout
-                android:layout_width="38dp"
-                android:layout_height="38dp"
-                android:background="#33FFFFFF">
-
-                <ImageView
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-                    android:layout_gravity="center"
-                    android:src="@drawable/ic_coach"
-                    app:tint="#FFFFFF" />
-            </FrameLayout>
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="14dp"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="✨ Chat with AI Assistant"
-                    android:textColor="#FFFFFF"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Ask about screen time, limits, &amp; schedules"
-                    android:textColor="#DBEAFE"
-                    android:textSize="12sp" />
-            </LinearLayout>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="➔"
-                android:textColor="#FFFFFF"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-        </LinearLayout>
-
-        <!-- ===== SECTION 1: ESP32 Connection ===== -->
-        <LinearLayout
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/keyLayout"
+            style="@style/Input.Outlined"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@drawable/bg_card_light"
-            android:padding="20dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="16dp">
+            android:layout_marginTop="12dp"
+            android:hint="@string/groq_key"
+            app:endIconMode="password_toggle">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Lamp Device Connection"
-                android:textSize="16sp"
-                android:textColor="@color/text_navy"
-                android:textStyle="bold"
-                android:layout_marginBottom="4dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Supports 2.4 GHz local WiFi networks & mDNS (focuslamp.local)"
-                android:textSize="12sp"
-                android:textColor="@color/text_secondary"
-                android:layout_marginBottom="12dp" />
-
-            <EditText
-                android:id="@+id/etIpAddress"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:background="@drawable/bg_input_light"
-                android:hint="ESP32 IP Address (e.g. 192.168.4.1)"
-                android:textColorHint="@color/text_muted"
-                android:textColor="@color/text_navy"
-                android:textSize="14sp"
-                android:paddingHorizontal="16dp"
-                android:inputType="text"
-                android:layout_marginBottom="12dp" />
-
-            <Button
-                android:id="@+id/btnSyncLamp"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:backgroundTint="@color/primary_blue"
-                android:text="Sync Lamp Connection"
-                android:textColor="@color/text_white"
-                android:textSize="14sp"
-                android:textAllCaps="false"
-                android:textStyle="bold"
-                android:stateListAnimator="@null" />
-
-        </LinearLayout>
-
-        <!-- ===== SECTION 2: Screen Time Limit ===== -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@drawable/bg_card_light"
-            android:padding="20dp"
-            android:layout_marginBottom="16dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Daily Focus Limit Slider"
-                android:textSize="16sp"
-                android:textColor="@color/text_navy"
-                android:textStyle="bold"
-                android:layout_marginBottom="4dp" />
-
-            <TextView
-                android:id="@+id/tvTimeLimitValue"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="30 minutes"
-                android:textSize="14sp"
-                android:textColor="@color/primary_green"
-                android:textStyle="bold"
-                android:layout_marginBottom="12dp" />
-
-            <SeekBar
-                android:id="@+id/seekBarTimeLimit"
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/keyInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:min="5"
-                android:max="120"
-                android:progress="30"
-                android:progressTint="@color/primary_green"
-                android:thumbTint="@color/primary_green" />
-
-        </LinearLayout>
-
-        <!-- ===== SECTION 3: Blocked Apps ===== -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@drawable/bg_card_light"
-            android:padding="20dp"
-            android:layout_marginBottom="16dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Tracked Distracting Apps"
-                android:textSize="16sp"
-                android:textColor="@color/text_navy"
-                android:textStyle="bold"
-                android:layout_marginBottom="8dp" />
-
-            <TextView
-                android:id="@+id/tvBlockedAppsList"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Loading blocklisted apps..."
-                android:textSize="14sp"
-                android:textColor="@color/text_secondary"
-                android:lineSpacingExtra="4dp" />
-
-        </LinearLayout>
-
-        <!-- ===== SECTION 4: Permissions ===== -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@drawable/bg_card_light"
-            android:padding="20dp"
-            android:layout_marginBottom="16dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="System Permissions Diagnostic"
-                android:textSize="16sp"
-                android:textColor="@color/text_navy"
-                android:textStyle="bold"
-                android:layout_marginBottom="4dp" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Usage Access & Display Over Other Apps are required for automatic focus enforcement."
-                android:textSize="13sp"
-                android:textColor="@color/text_secondary"
-                android:layout_marginBottom="12dp" />
-
-            <Button
-                android:id="@+id/btnGrantOverlay"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:backgroundTint="@color/danger_red"
-                android:text="Grant Overlay Permission"
-                android:textColor="@color/text_white"
-                android:textSize="14sp"
-                android:textAllCaps="false"
-                android:textStyle="bold"
-                android:stateListAnimator="@null"
-                android:layout_marginBottom="8dp" />
-
-            <Button
-                android:id="@+id/btnOemAutoStart"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:backgroundTint="@color/primary_blue"
-                android:text="Vivo / OEM AutoStart Settings"
-                android:textColor="@color/text_white"
-                android:textSize="14sp"
-                android:textAllCaps="false"
-                android:textStyle="bold"
-                android:stateListAnimator="@null" />
-
-        </LinearLayout>
-
-        <!-- ===== SECTION 5: Groq AI Integration ===== -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@drawable/bg_card_light"
-            android:padding="20dp"
-            android:layout_marginBottom="16dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="🤖 AI Coach Configuration (Groq LLM)"
-                android:textSize="16sp"
-                android:textColor="@color/text_navy"
-                android:textStyle="bold"
-                android:layout_marginBottom="4dp" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Enter your Groq API key (free at console.groq.com) to enable real-time Llama 3.3 focus analysis."
-                android:textSize="13sp"
-                android:textColor="@color/text_secondary"
-                android:layout_marginBottom="12dp" />
-
-            <EditText
-                android:id="@+id/etGroqApiKey"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:background="@drawable/bg_input_light"
-                android:hint="Enter Groq API Key (gsk_...)"
-                android:textColorHint="@color/text_muted"
-                android:textColor="@color/text_navy"
-                android:textSize="14sp"
-                android:paddingHorizontal="16dp"
                 android:inputType="textPassword"
-                android:layout_marginBottom="12dp" />
+                android:maxLines="1" />
+        </com.google.android.material.textfield.TextInputLayout>
 
-            <Button
-                android:id="@+id/btnTestGroqKey"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:backgroundTint="@color/primary_blue"
-                android:text="Test Groq API Key"
-                android:textColor="@color/text_white"
-                android:textSize="14sp"
-                android:textAllCaps="false"
-                android:textStyle="bold"
-                android:stateListAnimator="@null" />
-
-        </LinearLayout>
-
-        <!-- ===== SECTION 6: Parent Mode Redirect ===== -->
-        <LinearLayout
-            android:layout_width="match_parent"
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/saveKey"
+            style="@style/Button.Quiet"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@drawable/bg_card_light"
-            android:padding="20dp"
-            android:layout_marginBottom="16dp">
+            android:layout_marginTop="8dp"
+            android:text="@string/check_and_save" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="🛡️ Parent Mode & Security"
-                android:textSize="16sp"
-                android:textColor="@color/text_navy"
-                android:textStyle="bold"
-                android:layout_marginBottom="4dp" />
+        <TextView style="@style/Text.Heading" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="@dimen/section_gap" android:text="@string/this_phone" />
+        <TextView android:id="@+id/roleText" style="@style/Text.Secondary" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" />
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Parent controls, PIN lock, School Hours, &amp; Bedtime Mode are managed in the authenticated Parent Mode Dashboard."
-                android:textSize="13sp"
-                android:textColor="@color/text_secondary"
-                android:layout_marginBottom="12dp" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/switchRole"
+            style="@style/Button.Text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="-12dp"
+            android:text="@string/switch_to_parent" />
 
-            <Button
-                android:id="@+id/btnLaunchParentModeSettings"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:backgroundTint="@color/primary_blue"
-                android:text="Launch Parent Mode (PIN Required)"
-                android:textColor="@color/text_white"
-                android:textSize="14sp"
-                android:textAllCaps="false"
-                android:textStyle="bold"
-                android:stateListAnimator="@null" />
-
-        </LinearLayout>
-
-        <!-- Save Button -->
-        <Button
-            android:id="@+id/btnSaveSettings"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:backgroundTint="@color/primary_green"
-            android:text="Save Settings"
-            android:textColor="@color/text_white"
-            android:textSize="16sp"
-            android:textAllCaps="false"
-            android:textStyle="bold"
-            android:stateListAnimator="@null"
-            android:layout_marginBottom="24dp" />
-
+        <TextView android:id="@+id/version" style="@style/Text.Caption" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="16dp" />
     </LinearLayout>
-
-</ScrollView>
+</androidx.core.widget.NestedScrollView>

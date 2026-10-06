@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/todayFragment" android:icon="@drawable/ic_home" android:title="@string/tab_today" />
+    <item android:id="@+id/usageFragment" android:icon="@drawable/ic_usage" android:title="@string/tab_usage" />
+    <item android:id="@+id/focusFragment" android:icon="@drawable/ic_session" android:title="@string/tab_focus" />
+    <item android:id="@+id/familyFragment" android:icon="@drawable/ic_family" android:title="@string/tab_family" />
+</menu>

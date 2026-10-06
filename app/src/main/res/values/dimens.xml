@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="screen_padding">20dp</dimen>
+    <dimen name="section_gap">28dp</dimen>
+    <dimen name="row_gap">12dp</dimen>
+    <dimen name="radius_small">10dp</dimen>
+    <dimen name="radius_card">18dp</dimen>
+    <dimen name="app_icon">40dp</dimen>
+    <dimen name="bottom_bar_clearance">96dp</dimen>
+</resources>

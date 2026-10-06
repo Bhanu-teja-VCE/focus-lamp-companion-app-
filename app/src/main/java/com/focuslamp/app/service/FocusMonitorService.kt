@@ -1,193 +1,189 @@
 package com.focuslamp.app.service
 
 import android.app.Notification
-import android.app.PendingIntent
-import android.app.Service
+import android.content.Context
 import android.content.Intent
-import android.os.IBinder
-import android.util.Log
+import android.content.pm.ServiceInfo
+import android.os.Build
+import android.os.PowerManager
 import androidx.core.app.NotificationCompat
-import com.focuslamp.app.FocusLampApp
+import androidx.core.app.ServiceCompat
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.LifecycleService
+import androidx.lifecycle.lifecycleScope
+import com.focuslamp.app.Graph
 import com.focuslamp.app.R
-import com.focuslamp.app.data.network.HttpLampController
-import com.focuslamp.app.data.tracking.DistractingAppsManager
-import com.focuslamp.app.data.tracking.ScreenTimeTracker
-import com.focuslamp.app.ui.MainActivity
-import com.focuslamp.app.utils.OverlayManager
-import com.focuslamp.app.utils.SettingsManager
-import kotlinx.coroutines.*
+import com.focuslamp.app.data.lamp.LampState
+import com.focuslamp.app.data.tracking.ForegroundWatcher
+import com.focuslamp.app.data.tracking.UsageSnapshot
+import com.focuslamp.app.util.Format
+import com.focuslamp.app.util.Notifications
+import com.focuslamp.app.util.PermissionItem
+import com.focuslamp.app.util.Permissions
+import com.focuslamp.app.util.Role
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
- * Foreground Service that runs continuously in the background.
- *
- * Every 10 seconds, it:
- * 1. Checks total distraction time via UsageStatsManager
- * 2. If the limit is exceeded, sends /distraction so the lamp turns red
- * 3. If the limit is approaching, sends /warning so the lamp turns white
- * 4. If under limit, sends /focus so the lamp turns green
- *
- * The persistent notification ensures Android doesn't kill this service.
+ * Keeps Focus Lamp running in the background on the student's phone:
+ *  - refreshes today's usage every 10 s (every 60 s with the screen off)
+ *  - re-checks the app in front and blocks it if a limit ran out
+ *  - drives the lamp (with retries and a once-a-minute heartbeat)
+ *  - reports to the parent's phone every 5 minutes when linked
+ *  - polls the foreground app every second when the accessibility blocker is off
  */
-class FocusMonitorService : Service() {
+class FocusMonitorService : LifecycleService() {
 
-    private val serviceScope = CoroutineScope(Dispatchers.Default + Job())
-    private lateinit var screenTimeTracker: ScreenTimeTracker
-    private lateinit var distractingAppsManager: DistractingAppsManager
-    private lateinit var httpLampController: HttpLampController
-    private lateinit var settingsManager: SettingsManager
-    private lateinit var overlayManager: OverlayManager
-    private lateinit var scheduleManager: com.focuslamp.app.utils.ScheduleManager
-
-    private var monitoringJob: Job? = null
-
-    companion object {
-        private const val TAG = "FocusMonitorService"
-        private const val NOTIFICATION_ID = 1001
-        private const val CHECK_INTERVAL_MS = 10_000L // 10 seconds
-        private const val WARNING_THRESHOLD_PERCENT = 80L
-    }
+    private var fastPoll: Job? = null
+    private lateinit var watcher: ForegroundWatcher
+    private var lastIssues: List<String>? = null
 
     override fun onCreate() {
         super.onCreate()
-        screenTimeTracker = ScreenTimeTracker(this)
-        distractingAppsManager = DistractingAppsManager(this)
-        httpLampController = HttpLampController()
-        settingsManager = SettingsManager(this)
-        overlayManager = OverlayManager(this)
-        scheduleManager = com.focuslamp.app.utils.ScheduleManager(this)
+        running = true
+        watcher = ForegroundWatcher(Graph.tracker)
+        startInForeground(buildNotification(null))
+        Graph.family.startChildSync()
+        lifecycleScope.launch { mainLoop() }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        Log.d(TAG, "Service started")
-
-        // Start as a foreground service with a persistent notification
-        startForeground(NOTIFICATION_ID, createNotification())
-
-        // Begin the monitoring loop
-        startMonitoring()
-
-        return START_STICKY // Restart if killed by OS
+        super.onStartCommand(intent, flags, startId)
+        if (intent?.action == ACTION_PUBLISH_NOW) Graph.settings.lastStatusPublish = 0L
+        return START_STICKY
     }
-
-    override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {
+        running = false
+        fastPoll?.cancel()
         super.onDestroy()
-        monitoringJob?.cancel()
-        serviceScope.cancel()
-        settingsManager.isMonitoringActive = false
-        Log.d(TAG, "Service destroyed")
     }
 
-    /**
-     * Creates the persistent notification shown while monitoring is active.
-     */
-    private fun createNotification(): Notification {
-        val tapIntent = Intent(this, MainActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(
-            this, 0, tapIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
+    private suspend fun mainLoop() {
+        while (lifecycleScope.isActive) {
+            if (Graph.settings.role != Role.STUDENT) {
+                stopSelf()
+                return
+            }
+            val snapshot = Graph.usage.refresh()
+            val enforcer = Graph.enforcer
 
-        return NotificationCompat.Builder(this, FocusLampApp.CHANNEL_ID)
-            .setContentTitle("Focus Lamp Active")
-            .setContentText("Monitoring your screen time...")
-            .setSmallIcon(R.drawable.ic_lamp) // We'll create this icon
-            .setContentIntent(pendingIntent)
+            if (!enforcer.hasAccessibilityHost) {
+                enforcer.onForeground(snapshot.foreground)
+                ensureFastPoll()
+            } else {
+                fastPoll?.cancel()
+                fastPoll = null
+                enforcer.evaluate()
+            }
+
+            Graph.lamp.apply(lampStateFor(snapshot))
+            updateNotification(snapshot)
+            maybePublish(snapshot)
+
+            delay(if (isScreenOn()) TICK_MS else TICK_SCREEN_OFF_MS)
+        }
+    }
+
+    /** Fallback when accessibility access is off: check the app in front once a second. */
+    private fun ensureFastPoll() {
+        if (fastPoll?.isActive == true) return
+        if (!Permissions.isGranted(this, PermissionItem.OVERLAY)) return
+        fastPoll = lifecycleScope.launch {
+            while (isActive && !Graph.enforcer.hasAccessibilityHost) {
+                if (isScreenOn()) {
+                    val pkg = withContext(Dispatchers.IO) { watcher.poll() }
+                    if (pkg != Graph.enforcer.foreground) Graph.enforcer.onForeground(pkg)
+                }
+                delay(1_000L)
+            }
+        }
+    }
+
+    private fun lampStateFor(s: UsageSnapshot): LampState {
+        val fg = Graph.enforcer.foreground
+        return when {
+            Graph.enforcer.active.value != null -> LampState.DISTRACTION
+            Graph.focus.state.value.running && fg != null && Graph.distracting.isDistracting(fg) -> LampState.DISTRACTION
+            else -> LampState.forBudget(s.distractionMs, Graph.settings.timeLimitMinutes)
+        }
+    }
+
+    private suspend fun maybePublish(s: UsageSnapshot) {
+        if (!Graph.family.isPaired) return
+        val issues = protectionIssues()
+        val due = System.currentTimeMillis() - Graph.settings.lastStatusPublish > PUBLISH_MS
+        if (!due && issues == lastIssues) return
+        lastIssues = issues
+        val blocks = Graph.enforcer.currentBlocks()
+        withContext(Dispatchers.IO) {
+            Graph.family.publishStatus(s, Graph.settings.timeLimitMinutes, blocks, issues)
+        }
+    }
+
+    private fun protectionIssues(): List<String> = buildList {
+        if (!Permissions.isGranted(this@FocusMonitorService, PermissionItem.USAGE)) add("Usage access is off")
+        if (!Permissions.canBlock(this@FocusMonitorService)) add("App blocking is off")
+        if (!Permissions.isGranted(this@FocusMonitorService, PermissionItem.UNINSTALL)) add("Uninstall protection is off")
+    }
+
+    private fun isScreenOn() = (getSystemService(Context.POWER_SERVICE) as PowerManager).isInteractive
+
+    private fun startInForeground(n: Notification) {
+        val type = if (Build.VERSION.SDK_INT >= 34) ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE else 0
+        ServiceCompat.startForeground(this, Notifications.ID_MONITOR, n, type)
+    }
+
+    private fun updateNotification(s: UsageSnapshot) {
+        val n = buildNotification(s)
+        try {
+            androidx.core.app.NotificationManagerCompat.from(this).notify(Notifications.ID_MONITOR, n)
+        } catch (_: SecurityException) {
+        }
+    }
+
+    private fun buildNotification(s: UsageSnapshot?): Notification {
+        val budget = Graph.settings.timeLimitMinutes
+        val text = when {
+            s == null -> "Starting…"
+            !s.hasPermission -> "Usage access is off. Tap to turn it on."
+            else -> "${Format.durationWords(s.distractionMs)} of $budget min used on distracting apps"
+        }
+        return NotificationCompat.Builder(this, Notifications.CHANNEL_MONITOR)
+            .setSmallIcon(R.drawable.ic_lamp)
+            .setContentTitle("Focus Lamp is on")
+            .setContentText(text)
+            .setContentIntent(Notifications.openAppIntent(this))
             .setOngoing(true)
             .setSilent(true)
+            .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
             .build()
     }
 
-    /**
-     * The main monitoring loop.
-     * Runs every 10 seconds, checks distraction time, and signals the lamp.
-     */
-    private fun startMonitoring() {
-        monitoringJob?.cancel()
-        monitoringJob = serviceScope.launch {
-            settingsManager.isMonitoringActive = true
-            var lastModeSent = -1 // 0=Green, 1=White, 2=Red
+    companion object {
+        private const val TICK_MS = 10_000L
+        private const val TICK_SCREEN_OFF_MS = 60_000L
+        private const val PUBLISH_MS = 5 * 60_000L
+        const val ACTION_PUBLISH_NOW = "com.focuslamp.app.PUBLISH_NOW"
 
-            while (isActive) {
-                try {
-                    // 1. Check if Parent Scheduled Restriction (School Hours / Bedtime Mode) is active
-                    val activeScheduleReason = scheduleManager.getActiveRestrictionReason()
+        @Volatile
+        var running = false
+            private set
 
-                    // Only count apps the user has marked as distracting!
-                    val distractingLog = distractingAppsManager.getAll()
-                    val distractionMinutes = screenTimeTracker.getDistractionTimeOnly(distractingLog)
-                    val limit = settingsManager.timeLimitMinutes
-
-                    val limitMinutes = limit.toLong()
-                    val warningThreshold = maxOf(
-                        1L,
-                        (limitMinutes * WARNING_THRESHOLD_PERCENT + 99L) / 100L
-                    )
-
-                    Log.d(
-                        TAG,
-                        "Schedule: $activeScheduleReason / DistractionOnly: ${distractionMinutes}min / Warning: ${warningThreshold}min / Limit: ${limitMinutes}min"
-                    )
-
-                    val espIp = settingsManager.espIp
-                    val newMode: Int
-
-                    if (activeScheduleReason != null) {
-                        // Scheduled Restriction (School Hours / Bedtime Mode) is active -> Force Red Lamp & Overlay
-                        newMode = 2
-                    } else if (distractionMinutes >= limitMinutes) {
-                        newMode = 2
-                    } else if (distractionMinutes >= warningThreshold) {
-                        newMode = 1
-                    } else {
-                        newMode = 0
-                    }
-
-                    // Only send HTTP if the mode actually changed
-                    if (newMode != lastModeSent) {
-                        lastModeSent = newMode
-                        when (newMode) {
-                            0 -> httpLampController.sendFocus(espIp)
-                            1 -> httpLampController.sendWarning(espIp)
-                            2 -> httpLampController.sendDistraction(espIp)
-                        }
-                        Log.d(TAG, "Mode changed to $newMode. Sent command to ESP32.")
-                    }
-
-                    // --- OVERLAY & ALARM LOGIC ---
-                    if (newMode == 2 && !com.focuslamp.app.ui.parent.ParentModeActivity.isParentModeActive) {
-                        // Limit exceeded. Let's see what app the user is actively looking at.
-                        val currentApp = screenTimeTracker.getCurrentForegroundApp()
-
-                        if (currentApp != null && distractingLog.contains(currentApp)) {
-                            // Find the readable name for the UI
-                            val appUsageInfo = screenTimeTracker.getPerAppUsageToday(distractingLog)
-                                .find { it.packageName == currentApp }
-                            val appName = appUsageInfo?.appName ?: currentApp
-
-                            // Must be shown on the Main UI thread
-                            withContext(Dispatchers.Main) {
-                                overlayManager.showOverlay(appName)
-                            }
-                        } else {
-                            // They are looking at a safe app, or closing the distracting one
-                            withContext(Dispatchers.Main) {
-                                overlayManager.hideOverlay()
-                            }
-                        }
-                    } else {
-                        // User is within limits or authenticated parent is currently using Parent Mode
-                        withContext(Dispatchers.Main) {
-                            overlayManager.hideOverlay()
-                        }
-                    }
-
-                } catch (e: Exception) {
-                    Log.e(TAG, "Monitoring error: ${e.message}")
-                }
-
-                delay(CHECK_INTERVAL_MS)
+        /** Starts monitoring if this phone is a student's and usage access is granted. */
+        fun startIfAllowed(context: Context, publishNow: Boolean = false) {
+            if (Graph.settings.role != Role.STUDENT) return
+            if (!Graph.tracker.hasUsagePermission()) return
+            val intent = Intent(context, FocusMonitorService::class.java)
+            if (publishNow) intent.action = ACTION_PUBLISH_NOW
+            try {
+                ContextCompat.startForegroundService(context, intent)
+            } catch (e: Exception) {
+                // Android 12+ refuses background starts in some states; the next app open retries.
             }
         }
     }

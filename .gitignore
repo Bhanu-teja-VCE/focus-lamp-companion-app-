@@ -13,3 +13,7 @@ gen/
 out/
 .cxx/
 *.hprof
+
+# Firebase config is per-developer
+app/google-services.json
+functions/node_modules/

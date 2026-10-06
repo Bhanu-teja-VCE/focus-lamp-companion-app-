@@ -2,225 +2,86 @@ package com.focuslamp.app.data.tracking
 
 import android.app.AppOpsManager
 import android.app.usage.UsageEvents
-import android.app.usage.UsageStats
 import android.app.usage.UsageStatsManager
 import android.content.Context
-import android.content.pm.PackageManager
-import android.graphics.drawable.Drawable
-import java.util.Calendar
+import android.os.Process
 
 /**
- * ScreenTimeTracker — ActionDash & Digital Wellbeing grade screen time engine.
- * Reconstructs exact per-app foreground usage and screen time from Android UsageEvents stream,
- * handling screen off events, app switching, and OEM fallback.
+ * Reads Android's usage event stream and turns it into numbers with [UsageEngine].
+ * Every screen, the service, the parent dashboard and the AI coach read the result through
+ * [UsageRepository], so they can never disagree with each other.
  */
-class ScreenTimeTracker(private val context: Context) {
+class ScreenTimeTracker(
+    private val context: Context,
+    private val appInfo: AppInfoCache
+) {
+    private val usm = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
 
-    /**
-     * Checks if the user has granted Usage Access permission (PACKAGE_USAGE_STATS).
-     * Uses AppOpsManager.checkOpNoThrow for reliable runtime check across OEM devices.
-     */
     fun hasUsagePermission(): Boolean {
-        val appOpsManager = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
-        val mode = appOpsManager.checkOpNoThrow(
+        val appOps = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
+        @Suppress("DEPRECATION")
+        val mode = appOps.checkOpNoThrow(
             AppOpsManager.OPSTR_GET_USAGE_STATS,
-            android.os.Process.myUid(),
+            Process.myUid(),
             context.packageName
         )
         return mode == AppOpsManager.MODE_ALLOWED
     }
 
-    /**
-     * Reconstructs exact foreground durations for all apps from UsageEvents stream since midnight.
-     * Properly handles SCREEN_NON_INTERACTIVE and KEYGUARD_SHOWN events so screen-off time
-     * does not inflate app usage.
-     */
-    private fun getExactAppDurationsToday(): Map<String, Long> {
-        if (!hasUsagePermission()) return emptyMap()
+    /** Raw events between [from] and [to], translated to engine events. */
+    fun readEvents(from: Long, to: Long): List<RawUsageEvent> {
+        if (!hasUsagePermission()) return emptyList()
+        val stream = usm.queryEvents(from, to) ?: return emptyList()
+        val out = ArrayList<RawUsageEvent>(2048)
+        val e = UsageEvents.Event()
+        while (stream.hasNextEvent()) {
+            stream.getNextEvent(e)
+            val kind = kindOf(e.eventType) ?: continue
+            out += RawUsageEvent(e.timeStamp, e.packageName ?: "android", e.className, kind)
+        }
+        return out
+    }
 
-        val usageStatsManager =
-            context.getSystemService(Context.USAGE_STATS_SERVICE) as? UsageStatsManager
-                ?: return emptyMap()
-
-        val startTime = getMidnightTimestamp()
-        val endTime = System.currentTimeMillis()
-
-        val usageEvents = usageStatsManager.queryEvents(startTime, endTime) ?: return emptyMap()
-        val event = UsageEvents.Event()
-
-        val appDurations = mutableMapOf<String, Long>()
-        val ignoredPackages = setOf(
-            "com.android.systemui",
-            "android",
-            "com.google.android.inputmethod.latin"
+    /** Usage between [dayStart] and [end], recovering sessions that were already open at dayStart. */
+    fun compute(dayStart: Long, end: Long): UsageComputation {
+        val events = readEvents(dayStart - LOOKBACK_MS, end)
+        return UsageEngine.compute(
+            events = events,
+            windowStart = dayStart,
+            windowEnd = end,
+            excluded = appInfo.excludedPackages(),
+            countOnly = appInfo.launchableApps().keys
         )
-
-        var lastResumedPkg: String? = null
-        var lastResumedTime: Long = 0L
-
-        while (usageEvents.hasNextEvent()) {
-            usageEvents.getNextEvent(event)
-            val pkg = event.packageName ?: continue
-
-            if (ignoredPackages.contains(pkg)) continue
-
-            when (event.eventType) {
-                UsageEvents.Event.ACTIVITY_RESUMED -> {
-                    // Close previous active app session if user switched apps without pause event
-                    if (lastResumedPkg != null && lastResumedPkg != pkg) {
-                        val duration = event.timeStamp - lastResumedTime
-                        if (duration in 1..86400000L) {
-                            appDurations[lastResumedPkg!!] = (appDurations[lastResumedPkg!!] ?: 0L) + duration
-                        }
-                    }
-                    lastResumedPkg = pkg
-                    lastResumedTime = event.timeStamp
-                }
-
-                UsageEvents.Event.ACTIVITY_PAUSED, UsageEvents.Event.ACTIVITY_STOPPED -> {
-                    if (lastResumedPkg == pkg) {
-                        val duration = event.timeStamp - lastResumedTime
-                        if (duration in 1..86400000L) {
-                            appDurations[pkg] = (appDurations[pkg] ?: 0L) + duration
-                        }
-                        lastResumedPkg = null
-                    }
-                }
-
-                // Handle screen off or device lock — end active foreground session
-                UsageEvents.Event.SCREEN_NON_INTERACTIVE, UsageEvents.Event.KEYGUARD_SHOWN -> {
-                    if (lastResumedPkg != null) {
-                        val duration = event.timeStamp - lastResumedTime
-                        if (duration in 1..86400000L) {
-                            appDurations[lastResumedPkg!!] = (appDurations[lastResumedPkg!!] ?: 0L) + duration
-                        }
-                        lastResumedPkg = null
-                    }
-                }
-            }
-        }
-
-        // Account for currently active app running up to current time
-        if (lastResumedPkg != null) {
-            val duration = endTime - lastResumedTime
-            if (duration in 1..86400000L) {
-                appDurations[lastResumedPkg!!] = (appDurations[lastResumedPkg!!] ?: 0L) + duration
-            }
-        }
-
-        // Fallback to queryUsageStats if queryEvents returned no data (e.g., OEM restriction or fresh boot)
-        if (appDurations.isEmpty()) {
-            val stats = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, startTime, endTime)
-            if (!stats.isNullOrEmpty()) {
-                for (s in stats) {
-                    if (!ignoredPackages.contains(s.packageName) && s.lastTimeUsed >= startTime) {
-                        appDurations[s.packageName] = s.totalTimeInForeground
-                    }
-                }
-            }
-        }
-
-        return appDurations
     }
 
-    /**
-     * Calculates total active daily screen time (in minutes).
-     */
-    fun getTotalScreenTimeToday(): Long {
-        val appDurations = getExactAppDurationsToday()
-        val totalMs = appDurations.values.sum()
-        return (totalMs / 1000 / 60).coerceAtLeast(0L)
-    }
-
-    data class AppUsageInfo(
-        val packageName: String,
-        val appName: String,
-        val icon: Drawable?,
-        val usageMinutes: Long,
-        val isDistracting: Boolean = false
-    )
-
-    /**
-     * Returns a sorted list of apps with individual foreground usage today using queryEvents stream.
-     */
-    fun getPerAppUsageToday(distractingPackages: Set<String> = emptySet()): List<AppUsageInfo> {
-        val appDurations = getExactAppDurationsToday()
-        val pm = context.packageManager
-        val results = mutableListOf<AppUsageInfo>()
-
-        for ((packageName, totalTimeMs) in appDurations) {
-            if (totalTimeMs >= 60_000) { // >= 1 minute
-                val minutes = totalTimeMs / (1000 * 60)
-
-                val appName = try {
-                    val appInfo = pm.getApplicationInfo(packageName, 0)
-                    pm.getApplicationLabel(appInfo).toString()
-                } catch (e: PackageManager.NameNotFoundException) {
-                    continue
-                }
-
-                val icon = try {
-                    pm.getApplicationIcon(packageName)
-                } catch (e: PackageManager.NameNotFoundException) {
-                    null
-                }
-
-                val isDistracting = distractingPackages.contains(packageName)
-                results.add(AppUsageInfo(packageName, appName, icon, minutes, isDistracting))
-            }
+    /** Totals for several day windows from a single event read (for the weekly chart). */
+    fun computeDays(dayStarts: List<Long>, now: Long): List<UsageComputation> {
+        if (dayStarts.isEmpty()) return emptyList()
+        val events = readEvents(dayStarts.first() - LOOKBACK_MS, now)
+        val excluded = appInfo.excludedPackages()
+        val launchable = appInfo.launchableApps().keys
+        return dayStarts.mapIndexed { i, start ->
+            val end = if (i + 1 < dayStarts.size) dayStarts[i + 1] else now
+            UsageEngine.compute(events, start, minOf(end, now), excluded, launchable)
         }
-
-        return results.sortedByDescending { it.usageMinutes }
     }
 
-    /**
-     * Returns the total screen time (in minutes) for only the user-blacklisted distracting apps.
-     */
-    fun getDistractionTimeOnly(distractingPackages: Set<String>): Long {
-        if (distractingPackages.isEmpty()) return 0L
+    companion object {
+        /** How far before midnight we look to recover a session that was already open. */
+        const val LOOKBACK_MS = 3 * 60 * 60 * 1000L
 
-        val appDurations = getExactAppDurationsToday()
-        val totalDistractionMs = appDurations
-            .filter { distractingPackages.contains(it.key) }
-            .values
-            .sum()
-
-        return (totalDistractionMs / 1000 / 60).coerceAtLeast(0L)
-    }
-
-    private fun getMidnightTimestamp(): Long {
-        return Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }.timeInMillis
-    }
-
-    /**
-     * Determines the exact app package currently in the foreground by checking
-     * the most recent ACTIVITY_RESUMED event in the last 5 minutes.
-     */
-    fun getCurrentForegroundApp(): String? {
-        if (!hasUsagePermission()) return null
-
-        val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as? UsageStatsManager
-            ?: return null
-
-        val endTime = System.currentTimeMillis()
-        val startTime = endTime - (1000 * 60 * 5) // Look back 5 minutes
-
-        val usageEvents = usageStatsManager.queryEvents(startTime, endTime) ?: return null
-        val event = UsageEvents.Event()
-        var currentForegroundApp: String? = null
-
-        while (usageEvents.hasNextEvent()) {
-            usageEvents.getNextEvent(event)
-            if (event.eventType == UsageEvents.Event.ACTIVITY_RESUMED) {
-                currentForegroundApp = event.packageName
-            }
+        // Raw values so they work on API 26 (several named constants are API 28/29+).
+        fun kindOf(type: Int): UsageEventKind? = when (type) {
+            1 -> UsageEventKind.RESUMED      // ACTIVITY_RESUMED / MOVE_TO_FOREGROUND
+            2 -> UsageEventKind.PAUSED       // ACTIVITY_PAUSED / MOVE_TO_BACKGROUND
+            23 -> UsageEventKind.STOPPED     // ACTIVITY_STOPPED
+            15 -> UsageEventKind.SCREEN_ON   // SCREEN_INTERACTIVE
+            16 -> UsageEventKind.SCREEN_OFF  // SCREEN_NON_INTERACTIVE
+            17 -> UsageEventKind.LOCKED      // KEYGUARD_SHOWN
+            18 -> UsageEventKind.UNLOCKED    // KEYGUARD_HIDDEN
+            26 -> UsageEventKind.SHUTDOWN    // DEVICE_SHUTDOWN
+            27 -> UsageEventKind.STARTUP     // DEVICE_STARTUP
+            else -> null
         }
-
-        return currentForegroundApp
     }
 }

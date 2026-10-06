@@ -2,33 +2,43 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- ===== PERMISSIONS ===== -->
-    <!-- Internet: To send HTTP signals to the ESP32 -->
+    <!-- Lamp HTTP + Groq + Firebase -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
-    <!-- Wi-Fi Control: To programmatically toggle Wi-Fi -->
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
-
-    <!-- Screen Time Tracking: To read which apps are open and for how long -->
+    <!-- Screen time -->
     <uses-permission
         android:name="android.permission.PACKAGE_USAGE_STATS"
         tools:ignore="ProtectedPermissions" />
 
-    <!-- Foreground Service: To keep monitoring alive -->
+    <!-- Background monitoring -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
-
-    <!-- Notifications: Required on Android 13+ to show foreground service notification -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
-    <!-- System Alert Window: To draw the full-screen warning over distracting apps -->
+    <!-- Block screen when the accessibility blocker is off -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+
+    <!--
+        Android 11+ hides other apps from us unless we declare what we need to see.
+        Without this, app names and icons fail to load (the old "katana"/"musically" bug).
+        Every app with a launcher icon is visible, which covers every app a student can open.
+    -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.HOME" />
+        </intent>
+    </queries>
 
     <application
         android:name=".FocusLampApp"
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:icon="@drawable/ic_lamp"
         android:label="@string/app_name"
         android:roundIcon="@drawable/ic_lamp"
@@ -37,35 +47,84 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="34">
 
-        <!-- Main Activity -->
+        <!-- Entry point: routes to student or parent home based on the chosen role -->
         <activity
-            android:name=".ui.MainActivity"
-            android:exported="true">
+            android:name=".ui.WelcomeActivity"
+            android:exported="true"
+            android:theme="@style/Theme.FocusLamp">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <!-- Parent Mode Authenticated Activity -->
         <activity
-            android:name=".ui.parent.ParentModeActivity"
+            android:name=".ui.MainActivity"
             android:exported="false"
-            android:label="Parent Mode" />
-
-        <!-- AI Assistant Full-Screen Dedicated Activity -->
-        <activity
-            android:name=".ui.chat.AiChatActivity"
-            android:exported="false"
-            android:label="AI Focus Assistant"
+            android:launchMode="singleTask"
             android:windowSoftInputMode="adjustResize" />
 
-        <!-- Foreground Service for Screen Time Monitoring -->
+        <activity
+            android:name=".ui.parent.ParentActivity"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:windowSoftInputMode="adjustResize" />
+
         <service
             android:name=".service.FocusMonitorService"
             android:exported="false"
-            android:foregroundServiceType="specialUse" />
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Tracks screen time, drives the desk lamp and enforces app limits" />
+        </service>
+
+        <service
+            android:name=".service.BlockAccessibilityService"
+            android:exported="false"
+            android:label="@string/accessibility_label"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/accessibility_config" />
+        </service>
+
+        <service
+            android:name=".service.FocusMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <receiver
+            android:name=".service.BootReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".service.RequestActionReceiver"
+            android:exported="false" />
+
+        <receiver
+            android:name=".service.ProtectionAdminReceiver"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:permission="android.permission.BIND_DEVICE_ADMIN">
+            <meta-data
+                android:name="android.app.device_admin"
+                android:resource="@xml/device_admin" />
+            <intent-filter>
+                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+            </intent-filter>
+        </receiver>
 
     </application>
-
 </manifest>

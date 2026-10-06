@@ -2,95 +2,100 @@ package com.focuslamp.app.ui
 
 import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.provider.Settings
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.setupWithNavController
+import com.focuslamp.app.Graph
 import com.focuslamp.app.R
+import com.focuslamp.app.data.lamp.LampLink
 import com.focuslamp.app.databinding.ActivityMainBinding
+import com.focuslamp.app.service.FocusMonitorService
+import com.focuslamp.app.ui.coach.CoachSheet
+import com.focuslamp.app.ui.common.setLampDot
+import com.focuslamp.app.ui.common.visible
+import com.focuslamp.app.util.PermissionItem
+import com.focuslamp.app.util.Permissions
+import com.focuslamp.app.util.Role
+import kotlinx.coroutines.launch
 
 /**
- * Main Activity — handles navigation, header, permission checks, and hosts fragments.
+ * Student home. Four tabs (Today, Usage, Focus, Family) plus, from anywhere:
+ * the lamp chip (top), Settings (top), and the coach button (floating).
  */
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityMainBinding
-    private lateinit var viewModel: FocusViewModel
+    private lateinit var b: ActivityMainBinding
+    lateinit var tabs: TabNavigator
+        private set
 
-    // Notification permission launcher (Android 13+)
-    private val notificationPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        // Continue regardless — notification is nice-to-have, not mandatory
-    }
+    private val notificationPermission =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (Graph.settings.role != Role.STUDENT) {
+            startActivity(Intent(this, WelcomeActivity::class.java))
+            finish()
+            return
+        }
+        b = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(b.root)
 
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        val navHost = supportFragmentManager.findFragmentById(R.id.navHost) as NavHostFragment
+        val nav = navHost.navController
+        tabs = TabNavigator(nav, b.bottomNav, R.id.todayFragment).also { it.attach() }
 
-        viewModel = ViewModelProvider(this)[FocusViewModel::class.java]
-
-        // Set up Navigation
-        val navHostFragment = supportFragmentManager
-            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-        val navController = navHostFragment.navController
-
-        binding.bottomNavigation.setupWithNavController(navController)
-
-        // Header settings button click
-        binding.btnHeaderSettings.setOnClickListener {
-            if (navController.currentDestination?.id != R.id.settingsFragment) {
-                navController.navigate(R.id.settingsFragment)
-            }
+        nav.addOnDestinationChangedListener { _, dest, _ ->
+            b.screenTitle.text = dest.label
+            val isTab = tabs.isTab(dest.id)
+            b.backButton.visible(!isTab)
+            b.coachFab.visible(dest.id != R.id.rulesEditorFragment)
+            b.lampChip.visible(dest.id != R.id.lampFragment)
+            b.settingsButton.visible(dest.id != R.id.settingsFragment)
+        }
+        b.backButton.setOnClickListener { onBackPressedDispatcher.onBackPressed() }
+        b.settingsButton.setOnClickListener { tabs.open(R.id.settingsFragment) }
+        b.lampChip.setOnClickListener { tabs.open(R.id.lampFragment) }
+        b.coachFab.setOnClickListener {
+            val screen = nav.currentDestination?.label?.toString()
+            CoachSheet.newInstance(screen).show(supportFragmentManager, CoachSheet.TAG)
         }
 
-        // Header Parent Mode Shield button click (Requires PIN Auth first!)
-        binding.btnHeaderParentMode.setOnClickListener {
-            ParentPinAuthDialog(this) {
-                val intent = Intent(this, ParentModeActivity::class.java)
-                startActivity(intent)
-            }.show()
-        }
-
-        // Check permissions on launch
-        checkUsagePermission()
-        checkNotificationPermission()
-    }
-
-    private fun checkUsagePermission() {
-        if (!viewModel.hasUsagePermission()) {
-            AlertDialog.Builder(this)
-                .setTitle("Usage Access Required")
-                .setMessage(
-                    "Focus Lamp needs to monitor which apps you use to track your screen time.\n\n" +
-                    "Please enable \"Usage Access\" for Focus Lamp in the next screen."
-                )
-                .setPositiveButton("Open Settings") { _, _ ->
-                    startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                Graph.lamp.status.collect { s ->
+                    val (color, text) = when (s.link) {
+                        LampLink.ONLINE -> (s.state?.colorRes ?: R.color.lamp_green) to (s.state?.label ?: "Lamp")
+                        LampLink.OFFLINE -> R.color.lamp_off to getString(R.string.lamp_offline)
+                        LampLink.CONNECTING -> R.color.lamp_off to getString(R.string.lamp_connecting)
+                        LampLink.UNKNOWN -> R.color.lamp_off to getString(R.string.lamp)
+                    }
+                    b.lampChip.text = text
+                    b.lampChip.setLampDot(color)
+                    b.lampChip.contentDescription = getString(R.string.lamp_chip_description, text)
                 }
-                .setNegativeButton("Later", null)
-                .setCancelable(true)
-                .show()
+            }
+        }
+
+        if (savedInstanceState == null && Build.VERSION.SDK_INT >= 33 &&
+            !Permissions.isGranted(this, PermissionItem.NOTIFICATIONS)
+        ) {
+            notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
     }
 
-    private fun checkNotificationPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
-                != PackageManager.PERMISSION_GRANTED
-            ) {
-                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-            }
+    override fun onResume() {
+        super.onResume()
+        if (!::b.isInitialized) return
+        FocusMonitorService.startIfAllowed(this)
+        lifecycleScope.launch {
+            Graph.usage.refresh()
+            if (Graph.lamp.status.value.link == LampLink.UNKNOWN) Graph.lamp.check()
         }
     }
 }

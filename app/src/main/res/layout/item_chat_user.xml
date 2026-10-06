@@ -1,28 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:gravity="end"
-    android:orientation="vertical"
-    android:paddingHorizontal="16dp"
-    android:paddingVertical="6dp">
+    android:paddingStart="56dp"
+    android:paddingTop="6dp"
+    android:paddingBottom="6dp">
 
-    <LinearLayout
+    <TextView
+        android:id="@+id/text"
+        style="@style/Text.Body"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:maxWidth="280dp"
-        android:background="@drawable/bg_button_primary"
-        android:backgroundTint="#3B82F6"
-        android:orientation="vertical"
-        android:padding="14dp">
-
-        <TextView
-            android:id="@+id/tvUserMessage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="#FFFFFF"
-            android:textSize="15sp"
-            android:lineSpacingExtra="2dp" />
-
-    </LinearLayout>
-</LinearLayout>
+        android:layout_gravity="end"
+        android:background="@drawable/bg_bubble_user"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="10dp"
+        android:textColor="@color/night"
+        android:textIsSelectable="true" />
+</FrameLayout>

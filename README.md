@@ -26,7 +26,7 @@ Modern smartphones create constant cognitive friction through addictive screen t
 1. **Ambient Visual Nudges**: An ESP32-powered desk lamp changes color in real-time based on your active phone usage.
 2. **Distraction App Blocklisting**: Monitor screen time exclusively for selected high-distraction apps (e.g., Instagram, YouTube, TikTok, Games).
 3. **Active Enforcement**: When the set limit is breached, the lamp signals **Red Alert**, and the companion app restricts internet access to the distracting application.
-4. **Parental Control Mode (Roadmap)**: Remote limit monitoring & policy enforcement for parents and guardians.
+4. **Parental Controls**: Parents set limits from their own phone and approve extra time; blocked apps stay closed until they do. See [FAMILY_SETUP.md](FAMILY_SETUP.md).
 
 ---
 
@@ -99,7 +99,7 @@ sequenceDiagram
 | 5 | **5V 2A Power Adapter** | 1 | Stable power source for ESP32 + LEDs |
 | 6 | **Enclosure / Acrylic Diffuser** | 1 | Frosted dome for soft lighting diffusion |
 
-> View complete hardware details and regional buying guide in [Hardware_Components_List.md](file:///c:/Users/bhanu/Downloads/google%20anti%20gravity/focus%20lamp-the%20ultimate%20hardware%20project/Hardware_Components_List.md).
+> View complete hardware details and regional buying guide in [Hardware_Components_List.md](Hardware_Components_List.md).
 
 ---
 
@@ -118,9 +118,11 @@ sequenceDiagram
 ### 2. Install the Android Companion App
 1. Open the project in **Android Studio**.
 2. Build and install the APK on your Android device (Android 8.0+ required).
-3. Follow the detailed steps in [How_to_Build_APK.md](file:///c:/Users/bhanu/Downloads/google%20anti%20gravity/focus%20lamp-the%20ultimate%20hardware%20project/How_to_Build_APK.md).
+3. Follow the detailed steps in [How_to_Build_APK.md](How_to_Build_APK.md).
 4. Grant **Usage Access Permission** when prompted.
-5. In the app Settings screen, enter your ESP32 IP address and hit **Sync Lamp**.
+5. Tap the lamp chip at the top of the app, then **Find it for me** (or enter the IP) and **Connect**.
+
+See [CHANGES.md](CHANGES.md) for what changed in 2.0.
 
 ---
 

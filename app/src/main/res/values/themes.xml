@@ -1,41 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.FocusLamp" parent="Theme.Material3.Light.NoActionBar">
-        <!-- Primary brand color — Emerald Green -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryVariant">@color/colorPrimaryVariant</item>
-        <item name="colorOnPrimary">@color/colorOnPrimary</item>
-
-        <!-- Secondary brand color — Calm Blue -->
-        <item name="colorSecondary">@color/colorSecondary</item>
-        <item name="colorSecondaryVariant">@color/colorSecondaryVariant</item>
-        <item name="colorOnSecondary">@color/colorOnSecondary</item>
-
-        <!-- Background & Surface — Soft Light Theme -->
-        <item name="android:colorBackground">@color/colorBackground</item>
-        <item name="colorSurface">@color/colorSurface</item>
-        <item name="colorOnSurface">@color/colorOnSurface</item>
-
-        <!-- Error -->
-        <item name="colorError">@color/colorError</item>
-        <item name="colorOnError">@color/colorOnError</item>
-
-        <!-- Status bar & nav bar — Light status bar with dark icons -->
-        <item name="android:statusBarColor">@color/colorBackground</item>
-        <item name="android:navigationBarColor">@color/colorBackground</item>
-        <item name="android:windowLightStatusBar">true</item>
-
-        <!-- Text input styling -->
-        <item name="textInputStyle">@style/Widget.FocusLamp.TextInput</item>
+    <style name="Theme.FocusLamp" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="colorPrimary">@color/paper</item>
+        <item name="colorOnPrimary">@color/night</item>
+        <item name="colorPrimaryContainer">@color/surface_raised</item>
+        <item name="colorOnPrimaryContainer">@color/paper</item>
+        <item name="colorSecondary">@color/lamp_green</item>
+        <item name="colorOnSecondary">@color/night</item>
+        <item name="colorSecondaryContainer">@color/surface_raised</item>
+        <item name="colorOnSecondaryContainer">@color/paper</item>
+        <item name="colorTertiary">@color/amber</item>
+        <item name="colorError">@color/lamp_red</item>
+        <item name="colorOnError">@color/night</item>
+        <item name="android:colorBackground">@color/night</item>
+        <item name="colorOnBackground">@color/paper</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">@color/paper</item>
+        <item name="colorSurfaceVariant">@color/surface_raised</item>
+        <item name="colorOnSurfaceVariant">@color/text_secondary</item>
+        <item name="colorOutline">@color/outline</item>
+        <item name="android:textColorPrimary">@color/paper</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+        <item name="android:statusBarColor">@color/night</item>
+        <item name="android:navigationBarColor">@color/surface</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        <item name="bottomSheetDialogTheme">@style/ThemeOverlay.FocusLamp.BottomSheet</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.FocusLamp.Dialog</item>
+        <item name="checkboxStyle">@style/Widget.FocusLamp.CheckBox</item>
     </style>
 
-    <!-- Custom TextInput style for light theme -->
-    <style name="Widget.FocusLamp.TextInput" parent="Widget.Material3.TextInputLayout.OutlinedBox">
-        <item name="boxStrokeColor">@color/surface_border</item>
-        <item name="boxCornerRadiusTopStart">12dp</item>
-        <item name="boxCornerRadiusTopEnd">12dp</item>
-        <item name="boxCornerRadiusBottomStart">12dp</item>
-        <item name="boxCornerRadiusBottomEnd">12dp</item>
+    <style name="ThemeOverlay.FocusLamp.BottomSheet" parent="ThemeOverlay.Material3.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/Widget.FocusLamp.BottomSheet</item>
+        <item name="android:navigationBarColor">@color/surface</item>
     </style>
 
+    <style name="Widget.FocusLamp.BottomSheet" parent="Widget.Material3.BottomSheet.Modal">
+        <item name="backgroundTint">@color/surface</item>
+    </style>
+
+    <style name="ThemeOverlay.FocusLamp.Dialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorPrimary">@color/paper</item>
+    </style>
+
+    <style name="Widget.FocusLamp.CheckBox" parent="Widget.Material3.CompoundButton.CheckBox">
+        <item name="buttonTint">@color/checkbox_tint</item>
+    </style>
+
+    <!-- Type: serif for numbers and screen titles (the notebook on the desk),
+         sans for everything you read quickly. -->
+    <style name="Text.Display" parent="TextAppearance.Material3.DisplaySmall">
+        <item name="android:fontFamily">serif</item>
+        <item name="android:textSize">44sp</item>
+        <item name="android:letterSpacing">-0.02</item>
+        <item name="android:textColor">@color/paper</item>
+    </style>
+
+    <style name="Text.Title" parent="TextAppearance.Material3.HeadlineSmall">
+        <item name="android:fontFamily">serif</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:textColor">@color/paper</item>
+    </style>
+
+    <style name="Text.Heading" parent="TextAppearance.Material3.TitleMedium">
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/paper</item>
+    </style>
+
+    <style name="Text.Body" parent="TextAppearance.Material3.BodyLarge">
+        <item name="android:textSize">15sp</item>
+        <item name="android:lineSpacingExtra">3sp</item>
+        <item name="android:textColor">@color/paper</item>
+    </style>
+
+    <style name="Text.Secondary" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:textSize">14sp</item>
+        <item name="android:lineSpacingExtra">2sp</item>
+        <item name="android:textColor">@color/text_secondary</item>
+    </style>
+
+    <style name="Text.Caption" parent="TextAppearance.Material3.BodySmall">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/text_faint</item>
+    </style>
+
+    <style name="Text.Number" parent="TextAppearance.Material3.TitleMedium">
+        <item name="android:fontFamily">serif</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/paper</item>
+    </style>
+
+    <!-- Surfaces with different radii by role, not one radius for everything -->
+    <style name="Card.Section" parent="Widget.Material3.CardView.Filled">
+        <item name="cardBackgroundColor">@color/surface</item>
+        <item name="cardCornerRadius">@dimen/radius_card</item>
+        <item name="cardElevation">0dp</item>
+        <item name="contentPadding">16dp</item>
+    </style>
+
+    <style name="Button.Paper" parent="Widget.Material3.Button">
+        <item name="android:minHeight">52dp</item>
+        <item name="cornerRadius">26dp</item>
+        <item name="android:textSize">15sp</item>
+    </style>
+
+    <style name="Button.Quiet" parent="Widget.Material3.Button.TonalButton">
+        <item name="android:minHeight">48dp</item>
+        <item name="cornerRadius">24dp</item>
+        <item name="backgroundTint">@color/surface_raised</item>
+        <item name="android:textColor">@color/paper</item>
+    </style>
+
+    <style name="Button.Text" parent="Widget.Material3.Button.TextButton">
+        <item name="android:textColor">@color/paper</item>
+    </style>
+
+    <style name="Input.Outlined" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="boxStrokeColor">@color/paper</item>
+        <item name="boxCornerRadiusTopStart">@dimen/radius_small</item>
+        <item name="boxCornerRadiusTopEnd">@dimen/radius_small</item>
+        <item name="boxCornerRadiusBottomStart">@dimen/radius_small</item>
+        <item name="boxCornerRadiusBottomEnd">@dimen/radius_small</item>
+        <item name="hintTextColor">@color/paper</item>
+    </style>
+
+    <style name="Chip.Choice" parent="Widget.Material3.Chip.Filter">
+        <item name="chipBackgroundColor">@color/chip_bg</item>
+        <item name="chipStrokeWidth">0dp</item>
+        <item name="android:textColor">@color/chip_text</item>
+        <item name="checkedIconVisible">false</item>
+    </style>
+
+    <style name="Chip.Suggestion" parent="Widget.Material3.Chip.Suggestion">
+        <item name="chipBackgroundColor">@color/surface_raised</item>
+        <item name="chipStrokeWidth">0dp</item>
+        <item name="android:textColor">@color/paper</item>
+    </style>
+
+    <style name="BottomNav" parent="Widget.Material3.BottomNavigationView">
+        <item name="android:background">@color/surface</item>
+        <item name="itemIconTint">@color/nav_item</item>
+        <item name="itemTextColor">@color/nav_item</item>
+        <item name="itemActiveIndicatorStyle">@style/BottomNav.Indicator</item>
+        <item name="labelVisibilityMode">labeled</item>
+    </style>
+
+    <style name="BottomNav.Indicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
+        <item name="android:color">@color/surface_raised</item>
+    </style>
 </resources>

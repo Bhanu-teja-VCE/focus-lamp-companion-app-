@@ -1,288 +1,142 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorBackground"
-    android:fillViewport="true"
     android:clipToPadding="false"
-    android:paddingBottom="80dp">
+    android:paddingBottom="@dimen/bottom_bar_clearance">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingHorizontal="20dp"
-        android:paddingTop="16dp">
+        android:paddingHorizontal="@dimen/screen_padding"
+        android:paddingTop="8dp">
+
+        <!-- Not linked yet -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/linkCard"
+            style="@style/Card.Section"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView style="@style/Text.Heading" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/link_title" />
+
+                <TextView
+                    android:id="@+id/linkText"
+                    style="@style/Text.Secondary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="@string/link_text" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/codeLayout"
+                    style="@style/Input.Outlined"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:hint="@string/link_code_hint">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/codeInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:maxLength="6" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/linkButton"
+                    style="@style/Button.Paper"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/link_button" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Linked -->
+        <LinearLayout
+            android:id="@+id/linkedSection"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView android:id="@+id/linkedTitle" style="@style/Text.Title" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+            <TextView android:id="@+id/linkedSub" style="@style/Text.Secondary" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" />
+        </LinearLayout>
 
         <TextView
+            style="@style/Text.Heading"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="👨‍👩‍👧‍👦 Family Account & Parent Controls"
-            android:textColor="@color/text_navy"
-            android:textSize="22sp"
-            android:textStyle="bold" />
+            android:layout_marginTop="@dimen/section_gap"
+            android:text="@string/rules_from_parent" />
+
+        <LinearLayout android:id="@+id/rulesList" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" />
 
         <TextView
+            android:id="@+id/rulesEmpty"
+            style="@style/Text.Secondary"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:text="PIN-protected parent controls, scheduled restriction windows, and extension requests."
-            android:textColor="@color/text_secondary"
-            android:textSize="13sp" />
+            android:layout_marginTop="4dp"
+            android:text="@string/no_parent_rules" />
 
-        <!-- ===== SECTION 1: Active Schedule Status Banner ===== -->
+        <TextView
+            android:id="@+id/requestsHeading"
+            style="@style/Text.Heading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/section_gap"
+            android:text="@string/your_requests" />
+
+        <LinearLayout android:id="@+id/requestsList" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" />
+
+        <TextView
+            android:id="@+id/requestsEmpty"
+            style="@style/Text.Secondary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/no_requests" />
+
+        <!-- No second phone: a parent edits rules here behind the PIN -->
         <LinearLayout
+            android:id="@+id/localControls"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="#EBF8F2"
-            android:padding="16dp"
-            android:layout_marginTop="14dp">
+            android:layout_marginTop="@dimen/section_gap"
+            android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/tvScheduleStatusTitle"
-                android:layout_width="wrap_content"
+            <TextView style="@style/Text.Heading" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/parent_controls_here" />
+            <TextView style="@style/Text.Secondary" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="@string/parent_controls_here_text" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/openControls"
+                style="@style/Button.Quiet"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="CURRENT RESTRICTION STATUS"
-                android:textSize="11sp"
-                android:textColor="@color/text_muted"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/tvScheduleStatus"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="🟢 No Active Scheduled Restriction"
-                android:textColor="@color/primary_green"
-                android:textSize="15sp"
-                android:textStyle="bold" />
-
+                android:layout_marginTop="12dp"
+                android:text="@string/open_parent_controls"
+                app:icon="@drawable/ic_lock"
+                app:iconTint="@color/paper" />
         </LinearLayout>
 
-        <!-- ===== SECTION 2: Parent PIN Lock Security ===== -->
-        <LinearLayout
-            android:layout_width="match_parent"
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/unlinkButton"
+            style="@style/Button.Text"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@drawable/bg_card_light"
-            android:padding="20dp"
-            android:layout_marginTop="16dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="🔒 Parent PIN Lock Security"
-                android:textSize="16sp"
-                android:textColor="@color/text_navy"
-                android:textStyle="bold"
-                android:layout_marginBottom="4dp" />
-
-            <TextView
-                android:id="@+id/tvPinHint"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Set a 4-digit PIN to lock parent controls and prevent unauthorized changes."
-                android:textSize="12sp"
-                android:textColor="@color/text_secondary"
-                android:layout_marginBottom="12dp" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <EditText
-                    android:id="@+id/etParentPin"
-                    android:layout_width="0dp"
-                    android:layout_height="48dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/bg_input_light"
-                    android:hint="Enter 4-digit PIN"
-                    android:textColorHint="@color/text_muted"
-                    android:textColor="@color/text_navy"
-                    android:textSize="14sp"
-                    android:paddingHorizontal="16dp"
-                    android:inputType="numberPassword"
-                    android:maxLength="4" />
-
-                <Button
-                    android:id="@+id/btnSavePin"
-                    android:layout_width="wrap_content"
-                    android:layout_height="48dp"
-                    android:layout_marginStart="8dp"
-                    android:backgroundTint="@color/primary_blue"
-                    android:text="Save PIN"
-                    android:textColor="@color/text_white"
-                    android:textSize="13sp"
-                    android:textStyle="bold"
-                    android:textAllCaps="false"
-                    android:stateListAnimator="@null" />
-            </LinearLayout>
-
-        </LinearLayout>
-
-        <!-- ===== SECTION 3: Scheduled Restriction Windows ===== -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@drawable/bg_card_light"
-            android:padding="20dp"
-            android:layout_marginTop="16dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="⏰ Scheduled Restriction Windows"
-                android:textSize="16sp"
-                android:textColor="@color/text_navy"
-                android:textStyle="bold"
-                android:layout_marginBottom="12dp" />
-
-            <!-- School Hours Switch -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginBottom="12dp">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="🏫 School Hours Mode"
-                        android:textColor="@color/text_navy"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Mon–Fri, 8:00 AM – 3:00 PM"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="12sp" />
-                </LinearLayout>
-
-                <androidx.appcompat.widget.SwitchCompat
-                    android:id="@+id/switchSchoolMode"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="true" />
-            </LinearLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="#E2E8F0"
-                android:layout_marginVertical="8dp" />
-
-            <!-- Bedtime Mode Switch -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="🌙 Bedtime Mode"
-                        android:textColor="@color/text_navy"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Daily, 9:00 PM – 6:00 AM"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="12sp" />
-                </LinearLayout>
-
-                <androidx.appcompat.widget.SwitchCompat
-                    android:id="@+id/switchBedtimeMode"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="true" />
-            </LinearLayout>
-
-        </LinearLayout>
-
-        <!-- ===== SECTION 4: Extension Queue Card ===== -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@drawable/bg_card_light"
-            android:padding="20dp"
-            android:layout_marginTop="16dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="🙋 Pending Extension Requests"
-                android:textColor="@color/warning_amber"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/tvRequestDetails"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:text="Sam: Requesting +15 mins for study PDF finishing"
-                android:textColor="@color/text_navy"
-                android:textSize="14sp" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                android:orientation="horizontal">
-
-                <Button
-                    android:id="@+id/btnApproveExtension"
-                    android:layout_width="0dp"
-                    android:layout_height="44dp"
-                    android:layout_weight="1"
-                    android:backgroundTint="@color/primary_green"
-                    android:text="Approve (+15m)"
-                    android:textColor="@color/text_white"
-                    android:textSize="13sp"
-                    android:textStyle="bold"
-                    android:textAllCaps="false"
-                    android:stateListAnimator="@null" />
-
-                <Button
-                    android:id="@+id/btnRejectExtension"
-                    android:layout_width="0dp"
-                    android:layout_height="44dp"
-                    android:layout_marginStart="8dp"
-                    android:layout_weight="1"
-                    android:backgroundTint="@color/danger_red"
-                    android:text="Reject"
-                    android:textColor="@color/text_white"
-                    android:textSize="13sp"
-                    android:textStyle="bold"
-                    android:textAllCaps="false"
-                    android:stateListAnimator="@null" />
-            </LinearLayout>
-
-        </LinearLayout>
-
+            android:layout_marginTop="16dp"
+            android:text="@string/unlink"
+            android:visibility="gone" />
     </LinearLayout>
-</ScrollView>
+</androidx.core.widget.NestedScrollView>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_parent"
+    app:startDestination="@id/childrenFragment">
+
+    <fragment android:id="@+id/childrenFragment" android:name="com.focuslamp.app.ui.parent.ChildrenFragment" android:label="@string/title_children" />
+    <fragment android:id="@+id/requestsFragment" android:name="com.focuslamp.app.ui.parent.ParentRequestsFragment" android:label="@string/title_requests" />
+    <fragment android:id="@+id/parentRulesFragment" android:name="com.focuslamp.app.ui.family.RulesEditorFragment" android:label="@string/title_rules" />
+    <fragment android:id="@+id/parentSettingsFragment" android:name="com.focuslamp.app.ui.parent.ParentSettingsFragment" android:label="@string/title_settings" />
+</navigation>

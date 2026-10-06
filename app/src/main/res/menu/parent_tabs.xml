@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/childrenFragment" android:icon="@drawable/ic_family" android:title="@string/tab_children" />
+    <item android:id="@+id/requestsFragment" android:icon="@drawable/ic_requests" android:title="@string/tab_requests" />
+    <item android:id="@+id/parentRulesFragment" android:icon="@drawable/ic_rules" android:title="@string/tab_rules" />
+    <item android:id="@+id/parentSettingsFragment" android:icon="@drawable/ic_settings" android:title="@string/tab_settings" />
+</menu>

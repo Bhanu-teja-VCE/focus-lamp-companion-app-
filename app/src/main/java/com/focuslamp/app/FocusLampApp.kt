@@ -1,34 +1,30 @@
 package com.focuslamp.app
 
 import android.app.Application
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.os.Build
+import com.focuslamp.app.util.Notifications
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.launch
 
 class FocusLampApp : Application() {
 
-    companion object {
-        const val CHANNEL_ID = "focus_lamp_service_channel"
-        const val CHANNEL_NAME = "Focus Lamp Monitor"
-    }
-
     override fun onCreate() {
         super.onCreate()
-        createNotificationChannel()
-    }
+        Graph.init(this)
+        Notifications.createChannels(this)
 
-    private fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                CHANNEL_NAME,
-                NotificationManager.IMPORTANCE_LOW // Low = no sound, just persistent icon
-            ).apply {
-                description = "Keeps Focus Lamp monitoring running in the background"
-                setShowBadge(false)
-            }
-            val manager = getSystemService(NotificationManager::class.java)
-            manager.createNotificationChannel(channel)
+        // Rule or checkbox changes take effect immediately: an app that just got blocked
+        // (or unblocked by a parent) is covered (or uncovered) without waiting for the next tick.
+        Graph.appScope.launch {
+            combine(Graph.rules.version, Graph.distracting.apps) { _, _ -> }
+                .drop(1)
+                .collect {
+                    Graph.usage.reapplyDistracting()
+                    Graph.enforcer.evaluate()
+                }
+        }
+        Graph.appScope.launch {
+            Graph.focus.state.drop(1).collect { Graph.enforcer.evaluate() }
         }
     }
 }

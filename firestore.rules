@@ -1,0 +1,63 @@
+rules_version = '2';
+
+// Focus Lamp family data. Every phone signs in anonymously; access comes from membership.
+service cloud.firestore {
+  match /databases/{db}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function memberDoc(f) { return /databases/$(db)/documents/families/$(f)/members/$(request.auth.uid); }
+    function isMember(f) { return signedIn() && exists(memberDoc(f)); }
+    function isParent(f) { return isMember(f) && get(memberDoc(f)).data.role == 'parent'; }
+    function validCode(f, code) {
+      let c = get(/databases/$(db)/documents/pairingCodes/$(code));
+      return c.data.familyId == f && c.data.expiresAt > request.time;
+    }
+
+    // Short-lived 6-digit codes. Create-only: an existing code can't be overwritten.
+    match /pairingCodes/{code} {
+      allow get: if signedIn();
+      allow create: if signedIn() && isParent(request.resource.data.familyId)
+                    && request.resource.data.createdBy == request.auth.uid;
+      allow delete: if signedIn() && resource.data.createdBy == request.auth.uid;
+    }
+
+    match /families/{f} {
+      allow create: if signedIn() && request.resource.data.createdBy == request.auth.uid;
+      allow read: if isMember(f);
+
+      match /members/{uid} {
+        allow read: if isMember(f);
+        // The creator joins as parent; anyone else joins as child with a valid code.
+        allow create: if signedIn() && request.auth.uid == uid && (
+          (request.resource.data.role == 'parent'
+            && get(/databases/$(db)/documents/families/$(f)).data.createdBy == uid) ||
+          (request.resource.data.role == 'child'
+            && validCode(f, request.resource.data.joinCode)));
+        // Members update their own doc (push tokens) but can't change their role.
+        allow update: if request.auth.uid == uid && request.resource.data.role == resource.data.role;
+        allow delete: if request.auth.uid == uid || isParent(f);
+      }
+
+      // What a student's phone reports. Only that phone writes it.
+      match /children/{uid} {
+        allow read: if isMember(f);
+        allow write: if isMember(f) && request.auth.uid == uid;
+
+        // Rules for that student. Only parents write them.
+        match /control/{doc} {
+          allow read: if isMember(f);
+          allow write: if isParent(f);
+        }
+      }
+
+      // Requests: a student creates their own pending request; only parents answer.
+      match /requests/{id} {
+        allow read: if isMember(f);
+        allow create: if isParent(f) || (isMember(f)
+          && request.resource.data.childUid == request.auth.uid
+          && request.resource.data.status == 'pending');
+        allow update: if isParent(f);
+      }
+    }
+  }
+}

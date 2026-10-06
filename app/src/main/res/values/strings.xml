@@ -1,6 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Focus Lamp</string>
-    <string name="home_title">Focus Lamp</string>
-    <string name="settings_title">Settings</string>
-    <string name="history_title">History</string>
+
+    <!-- Navigation -->
+    <string name="tab_today">Today</string>
+    <string name="tab_usage">Usage</string>
+    <string name="tab_focus">Focus</string>
+    <string name="tab_family">Family</string>
+    <string name="tab_children">Children</string>
+    <string name="tab_requests">Requests</string>
+    <string name="tab_rules">Rules</string>
+    <string name="tab_settings">Settings</string>
+    <string name="title_today">Today</string>
+    <string name="title_usage">Usage</string>
+    <string name="title_focus">Focus</string>
+    <string name="title_family">Family</string>
+    <string name="title_lamp">Lamp</string>
+    <string name="title_settings">Settings</string>
+    <string name="title_parent_controls">Parent controls</string>
+    <string name="title_children">Your children</string>
+    <string name="title_requests">Requests</string>
+    <string name="title_rules">Rules</string>
+    <string name="back">Back</string>
+    <string name="settings">Settings</string>
+    <string name="close">Close</string>
+    <string name="done">Done</string>
+    <string name="remove">Remove</string>
+    <string name="on">On</string>
+    <string name="turn_on">Turn on</string>
+
+    <!-- Lamp chip -->
+    <string name="lamp">Lamp</string>
+    <string name="lamp_offline">Lamp offline</string>
+    <string name="lamp_connecting">Connecting</string>
+    <string name="lamp_chip_description">Lamp: %1$s. Open lamp settings.</string>
+    <string name="ask_coach">Ask coach</string>
+
+    <!-- Welcome -->
+    <string name="welcome_text">A desk lamp that shows how your phone time is going: green while you\'re fine, warm white as you get close to your limit, red when it\'s used up.</string>
+    <string name="your_name">Your name</string>
+    <string name="whose_phone">Whose phone is this?</string>
+    <string name="role_student">Mine. I\'m the student</string>
+    <string name="role_parent">I\'m a parent</string>
+    <string name="role_note">Parents install Focus Lamp on their own phone to set limits and answer requests for more time.</string>
+
+    <!-- Today -->
+    <string name="setup_title">Finish setting up</string>
+    <string name="stat_screen_time">screen time</string>
+    <string name="stat_pickups">pickups</string>
+    <string name="stat_focus">focus today</string>
+    <string name="paused_now">Paused right now</string>
+    <string name="top_distracting">Distracting apps today</string>
+    <string name="see_all_apps">All apps</string>
+    <string name="top_empty">None of your distracting apps were opened today.</string>
+    <string name="start_focus">Start a focus session</string>
+
+    <!-- Usage -->
+    <string name="week_legend">Last 7 days. The red part is distracting apps.</string>
+    <string name="apps_today">Apps today</string>
+    <string name="apps_hint">Tick the apps that distract you. Only ticked apps count toward your daily budget and the lamp. Tap an app to set its own limit.</string>
+    <string name="mark_distracting">Mark %1$s as distracting</string>
+    <string name="counts_as_distracting">Counts as distracting</string>
+    <string name="your_daily_limit">Your daily limit</string>
+    <string name="your_daily_limit_hint">When it runs out, the app stays closed until midnight.</string>
+    <string name="no_limit">No limit</string>
+
+    <!-- Focus -->
+    <string name="session_length">Length</string>
+    <string name="strict_focus">Pause distracting apps during the session</string>
+    <string name="start_session">Start focus session</string>
+    <string name="end_session">End session</string>
+    <string name="ready">Ready</string>
+    <string name="past_sessions">Past sessions</string>
+    <string name="no_sessions">Your finished sessions will show up here.</string>
+
+    <!-- Family (student) -->
+    <string name="link_title">Link to a parent\'s phone</string>
+    <string name="link_text">Your parent can then set limits from their phone and approve extra time when you ask.</string>
+    <string name="link_unavailable">Linking phones isn\'t set up in this version of the app. A parent can still set rules here with a PIN.</string>
+    <string name="link_code_hint">6-digit code from the parent\'s phone</string>
+    <string name="link_button">Link</string>
+    <string name="rules_from_parent">Rules from your parent</string>
+    <string name="no_parent_rules">No rules from a parent yet.</string>
+    <string name="your_requests">Your requests</string>
+    <string name="no_requests">When an app is paused by a parent limit, you can ask for more time from the block screen.</string>
+    <string name="parent_controls_here">Parent controls on this phone</string>
+    <string name="parent_controls_here_text">No second phone? A parent can set limits and schedules here, protected by a PIN.</string>
+    <string name="open_parent_controls">Open parent controls</string>
+    <string name="unlink">Unlink from parent</string>
+    <string name="pin_hint">Parent PIN</string>
+    <string name="pin_confirm_hint">Enter it again</string>
+
+    <!-- Rules editor -->
+    <string name="rules_limits_title">Daily app limits</string>
+    <string name="rules_limits_hint">When a limit runs out, the app stays closed until you open it again, even on the next day.</string>
+    <string name="add_app_limit">Add an app limit</string>
+    <string name="rules_schedules_title">Schedules</string>
+    <string name="rules_schedules_hint">While a schedule is on, distracting apps and apps with a limit stay closed.</string>
+    <string name="rules_pin_title">Unlock PIN</string>
+    <string name="save_rules">Save rules</string>
+
+    <!-- Lamp -->
+    <string name="lamp_address">Lamp address</string>
+    <string name="lamp_address_hint">The lamp and this phone need to be on the same Wi-Fi.</string>
+    <string name="lamp_ip_hint">IP address, e.g. 192.168.1.120</string>
+    <string name="lamp_connect">Connect</string>
+    <string name="lamp_find">Find it for me</string>
+    <string name="lamp_searching">Searching…</string>
+    <string name="lamp_colors">What the colors mean</string>
+    <string name="lamp_green_meaning">Green: under 80% of your daily budget</string>
+    <string name="lamp_warm_meaning">Warm white: 80% used, time to wrap up</string>
+    <string name="lamp_red_meaning">Red: budget used up, or a paused app is open</string>
+    <string name="lamp_test">Test the lamp</string>
+    <string name="lamp_test_hint">Sends one color to check the connection.</string>
+    <string name="green">Green</string>
+    <string name="warm">Warm</string>
+    <string name="red">Red</string>
+
+    <!-- Settings -->
+    <string name="daily_budget">Daily budget for distracting apps</string>
+    <string name="daily_budget_hint">All ticked apps together. The lamp follows this number.</string>
+    <string name="block_on_budget">Pause distracting apps when it runs out</string>
+    <string name="permissions">Permissions</string>
+    <string name="oem_autostart">Allow auto-start on this phone</string>
+    <string name="coach">Coach</string>
+    <string name="coach_key_hint">The coach runs on Groq. Get a free key at console.groq.com and paste it here.</string>
+    <string name="groq_key">Groq API key</string>
+    <string name="check_and_save">Check and save</string>
+    <string name="this_phone">This phone</string>
+    <string name="switch_to_parent">Use this phone as a parent\'s</string>
+    <string name="switch_to_student">Use this phone as a student\'s</string>
+
+    <!-- Coach -->
+    <string name="clear_chat">Clear</string>
+    <string name="coach_intro">Ask about your screen time, your lamp, or how to plan study time. The coach sees today\'s numbers.</string>
+    <string name="coach_needs_key">The coach needs a Groq API key. It\'s free at console.groq.com.</string>
+    <string name="coach_thinking">Thinking…</string>
+    <string name="coach_input_hint">Ask the coach</string>
+    <string name="send">Send</string>
+
+    <!-- Block screen -->
+    <string name="block_ask_heading">Ask for more time</string>
+    <string name="block_reason_heading">What\'s it for? (optional)</string>
+    <string name="block_pin_heading">Parent PIN</string>
+    <string name="block_parent_here">Parent here? Unlock with PIN</string>
+    <string name="block_go_home">Go to home screen</string>
+
+    <!-- Parent -->
+    <string name="parent_setup_title">Connect the family service first</string>
+    <string name="parent_setup_text">Approving from your own phone needs a Firebase project. The steps are in FAMILY_SETUP.md in the project folder. Until then, set rules on the student\'s phone under Family, Parent controls.</string>
+    <string name="create_family_title">Set up your family</string>
+    <string name="create_family_text">Then link each student\'s phone with a short code.</string>
+    <string name="create_family">Create family</string>
+    <string name="add_child_title">Add a student\'s phone</string>
+    <string name="add_child_text">Show a code, then enter it on the student\'s phone under Family.</string>
+    <string name="show_code">Show a code</string>
+    <string name="new_code">New code</string>
+    <string name="most_used_today">Most used today</string>
+    <string name="open_for_30">Open 30 min</string>
+    <string name="opened">Opened</string>
+    <string name="waiting_for_you">Waiting for you</string>
+    <string name="no_pending">Nothing waiting. Requests also arrive as notifications you can answer directly.</string>
+    <string name="answered">Answered</string>
+    <string name="no_history">No answered requests yet.</string>
+    <string name="allow">Allow</string>
+    <string name="not_now">Not now</string>
+
+    <!-- Accessibility service -->
+    <string name="accessibility_label">Focus Lamp app blocker</string>
+    <string name="accessibility_description">Lets Focus Lamp notice which app is opened so it can cover apps whose time limit has run out. Focus Lamp doesn\'t read what\'s on the screen.</string>
 </resources>
