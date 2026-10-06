@@ -116,6 +116,11 @@ sequenceDiagram
 4. Open the Serial Monitor at `115200 baud` to note down the ESP32's assigned IP address (e.g., `192.168.1.120`).
 
 ### 2. Install the Android Companion App
+
+**Easiest:** download the latest build on your phone from this repo's **Releases** section
+(`focus-lamp.apk`). GitHub builds it automatically on every push (see `.github/workflows/build-apk.yml`).
+
+To build it yourself instead:
 1. Open the project in **Android Studio**.
 2. Build and install the APK on your Android device (Android 8.0+ required).
 3. Follow the detailed steps in [How_to_Build_APK.md](How_to_Build_APK.md).

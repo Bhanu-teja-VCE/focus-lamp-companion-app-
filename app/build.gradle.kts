@@ -26,6 +26,18 @@ android {
         buildConfigField("boolean", "FAMILY_BACKEND", hasFirebaseConfig.toString())
     }
 
+    // A fixed debug key (committed on purpose; it only signs test builds) so every build,
+    // local or from GitHub, installs over the previous one instead of failing with
+    // "App not installed" because of a different signature.
+    signingConfigs {
+        getByName("debug") {
+            storeFile = file("debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
